@@ -90,7 +90,7 @@ function paneBeast() {
     const nx = f.next, ok = canEvolve(S), chk = (b, t) => `<div>${b ? '<span class="good">○</span>' : '<span class="bad">×</span>'} ${t}</div>`;
     const mz = matZone(S, ev);
     h += `<div class="card"><h3>进化 · 第 ${S.stage + 1} 阶${nx.length > 1 ? '<span class="dim">（' + nx.length + ' 选 1）</span>' : ''}</h3>
-<div class="row" style="gap:4px;margin-bottom:4px">${nx.map(id => `<img class="ic" style="width:${nx.length > 2 ? 60 : 84}px;height:auto" src="${formIcon(id, !S.forms[id])}">`).join('')}</div>
+<div class="row" style="gap:4px;margin-bottom:4px">${nx.map(id => `<img class="ic${S.forms[id] ? '' : ' sil'}" style="width:${nx.length > 2 ? 60 : 84}px;height:auto" src="${formIcon(id, !S.forms[id])}">`).join('')}</div>
 ${chk(S.lv >= ev.lv, `等级 ${S.lv}/${ev.lv}`)}${ev.boss >= 0 ? chk(!!S.bossWins[ev.boss], `${ZONES[ev.boss].boss}精血（打倒${ZONES[ev.boss].boss}）`) : ''}${chk(mz >= 0, `${ZONES[ev.z].mat} ${fmt(S.mats[ev.z])}/${ev.mat}${ev.z < S.maxZone ? '<span class="dim">（后面区的材料也行）</span>' : ''}`)}
 <div style="margin-top:6px;text-align:center"><button class="btn ${ok ? 'g glow' : 'off'}" data-k="evo" data-act="evo" ${ok ? '' : 'disabled'}>进化 · 战力 ×${BAL.evoMul}</button></div></div>`;
   } else h += `<div class="card"><h3>已是上古神兽</h3><div class="dim">打倒夔后可以涅槃，从幼崽再修一世。</div></div>`;
@@ -139,7 +139,7 @@ function paneBook() {
 <div style="margin-top:3px">攻击、生命 <b class="gold">×${fmt(D.MM)}</b>${D.cap < 1e9 ? `<span class="dim"> · 打倒${ZONES[Math.min(7, nb)].boss}，上限放开到 ${BAL.mCap[nb + 1] >= 1e9 ? '无限' : BAL.mCap[nb + 1]}</span>` : ''}</div>
 <div class="dim">每种怪杀 10/50/200/800/3000 只、每件装备、每个形态、每只大妖都加点</div></div>`;
   h += `<div class="card"><h3>形态 ${Object.keys(S.forms).length}/${Object.keys(FORMS).length}</h3><div class="grid" style="grid-template-columns:repeat(4,1fr)">`;
-  for (const id in FORMS) { const own = S.forms[id]; h += `<div style="text-align:center"><img style="width:100%;image-rendering:pixelated" src="${formIcon(id, !own)}"><div class="${own ? '' : 'dim'}">${own ? FORMS[id].n : '？？？'}</div></div>`; }
+  for (const id in FORMS) { const own = S.forms[id]; h += `<div style="text-align:center"><img style="width:100%;image-rendering:pixelated" src="${formIcon(id, !own)}"${own ? '' : ' class="sil"'}><div class="${own ? '' : 'dim'}">${own ? FORMS[id].n : '？？？'}</div></div>`; }
   h += '</div></div><div class="card"><h3>装备 ' + Object.keys(S.items).length + '/42</h3><div class="grid">';
   for (let r = 0; r < 6; r++) for (const sl of SLOTS) { const own = S.items[sl.id + ':' + r]; h += `<div class="frame" style="border-color:${own ? RAR[r].c : '#000'}">${img(slotIcon(sl.id, PIX['i-' + sl.id + '-' + r] ? r : own ? r : -1), own ? 'b' : 'b sil')}</div>`; }
   h += '</div></div><div class="card"><h3>妖兽</h3>';

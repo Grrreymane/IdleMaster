@@ -41,7 +41,7 @@
   .res { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
   .ic { width: 16px; height: 16px; image-rendering: pixelated; vertical-align: middle; flex: none; }
   .ic.b { width: 28px; height: 28px; object-fit: contain; }
-  .ic.sil { filter: brightness(0) opacity(.35); }
+  .sil { filter: brightness(0) opacity(.35); }
   #goal { flex: none; display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: #1e1729; border-bottom: 2px solid var(--line); min-height: 30px; }
   #goal .t { flex: 1; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #pane { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 6px 8px 10px; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
@@ -1536,7 +1536,8 @@ function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefin
 function gearOf(S) { const g = {}; for (const s of SLOTS) if (S.slots[s.id].r >= 0) g[s.id] = S.slots[s.id].r; return g; }
 // ------------------------------------------------------------ small icons (DOM uses them as data URLs)
 const ICONS = {};
-function iconURL(k, make) { return ICONS[k] || (ICONS[k] = make().toDataURL()); }
+// file:// pages: a canvas that drew an img/ picture is 'tainted' and toDataURL throws -> fall back to an empty pixel
+function iconURL(k, make) { if (ICONS[k]) return ICONS[k]; let u; try { u = make().toDataURL(); } catch (e) { u = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='; } return (ICONS[k] = u); }
 const SLOT_ROWS = {
   horn: ['..X..X..', '.XX..XX.', '.X....X.', 'XX....XX', 'X......X', '.XXXXXX.'],
   claw: ['X..X..X.', 'X..X..X.', 'XX.XX.XX', '.XXXXXX.', '.XXXXXX.', '..XXXX..'],
@@ -1567,7 +1568,8 @@ const MISC_ROWS = {
 function miscIcon(k) { return iconURL('m' + k, () => rows(MISC_ROWS[k][0], MISC_ROWS[k][1])); }
 const MAT_COL = ['#7ac860', '#d0603a', '#a8c8e8', '#f0a8b8', '#c89a48', '#ff8a6a', '#8ad0b0', '#ffd040'];
 function matIcon(z) { return iconURL('mat' + z, () => rows(['..XX..', '.XYYX.', 'XYYYYX', 'XYYYXX', '.XXXX.'], { X: shade(MAT_COL[z], -60), Y: MAT_COL[z] })); }
-function formIcon(id, sil) {   // portrait thumbnail for the codex / evolution choice
+function formIcon(id, sil) {   // portrait thumbnail for the codex / evolution choice (drawn forms: the picture itself, CSS .sil darkens it)
+  if (PIX[id]) return 'img/' + id + '.png';
   return iconURL('form' + id + (sil ? 's' : ''), () => { const s = formSprite(id, {}); return sil ? s.sil : s.cv; });
 }
 // ==== end source:src/art_forms.js ====
@@ -1947,7 +1949,7 @@ function paneBeast() {
     const nx = f.next, ok = canEvolve(S), chk = (b, t) => `<div>${b ? '<span class="good">○</span>' : '<span class="bad">×</span>'} ${t}</div>`;
     const mz = matZone(S, ev);
     h += `<div class="card"><h3>进化 · 第 ${S.stage + 1} 阶${nx.length > 1 ? '<span class="dim">（' + nx.length + ' 选 1）</span>' : ''}</h3>
-<div class="row" style="gap:4px;margin-bottom:4px">${nx.map(id => `<img class="ic" style="width:${nx.length > 2 ? 60 : 84}px;height:auto" src="${formIcon(id, !S.forms[id])}">`).join('')}</div>
+<div class="row" style="gap:4px;margin-bottom:4px">${nx.map(id => `<img class="ic${S.forms[id] ? '' : ' sil'}" style="width:${nx.length > 2 ? 60 : 84}px;height:auto" src="${formIcon(id, !S.forms[id])}">`).join('')}</div>
 ${chk(S.lv >= ev.lv, `等级 ${S.lv}/${ev.lv}`)}${ev.boss >= 0 ? chk(!!S.bossWins[ev.boss], `${ZONES[ev.boss].boss}精血（打倒${ZONES[ev.boss].boss}）`) : ''}${chk(mz >= 0, `${ZONES[ev.z].mat} ${fmt(S.mats[ev.z])}/${ev.mat}${ev.z < S.maxZone ? '<span class="dim">（后面区的材料也行）</span>' : ''}`)}
 <div style="margin-top:6px;text-align:center"><button class="btn ${ok ? 'g glow' : 'off'}" data-k="evo" data-act="evo" ${ok ? '' : 'disabled'}>进化 · 战力 ×${BAL.evoMul}</button></div></div>`;
   } else h += `<div class="card"><h3>已是上古神兽</h3><div class="dim">打倒夔后可以涅槃，从幼崽再修一世。</div></div>`;
@@ -1996,7 +1998,7 @@ function paneBook() {
 <div style="margin-top:3px">攻击、生命 <b class="gold">×${fmt(D.MM)}</b>${D.cap < 1e9 ? `<span class="dim"> · 打倒${ZONES[Math.min(7, nb)].boss}，上限放开到 ${BAL.mCap[nb + 1] >= 1e9 ? '无限' : BAL.mCap[nb + 1]}</span>` : ''}</div>
 <div class="dim">每种怪杀 10/50/200/800/3000 只、每件装备、每个形态、每只大妖都加点</div></div>`;
   h += `<div class="card"><h3>形态 ${Object.keys(S.forms).length}/${Object.keys(FORMS).length}</h3><div class="grid" style="grid-template-columns:repeat(4,1fr)">`;
-  for (const id in FORMS) { const own = S.forms[id]; h += `<div style="text-align:center"><img style="width:100%;image-rendering:pixelated" src="${formIcon(id, !own)}"><div class="${own ? '' : 'dim'}">${own ? FORMS[id].n : '？？？'}</div></div>`; }
+  for (const id in FORMS) { const own = S.forms[id]; h += `<div style="text-align:center"><img style="width:100%;image-rendering:pixelated" src="${formIcon(id, !own)}"${own ? '' : ' class="sil"'}><div class="${own ? '' : 'dim'}">${own ? FORMS[id].n : '？？？'}</div></div>`; }
   h += '</div></div><div class="card"><h3>装备 ' + Object.keys(S.items).length + '/42</h3><div class="grid">';
   for (let r = 0; r < 6; r++) for (const sl of SLOTS) { const own = S.items[sl.id + ':' + r]; h += `<div class="frame" style="border-color:${own ? RAR[r].c : '#000'}">${img(slotIcon(sl.id, PIX['i-' + sl.id + '-' + r] ? r : own ? r : -1), own ? 'b' : 'b sil')}</div>`; }
   h += '</div></div><div class="card"><h3>妖兽</h3>';

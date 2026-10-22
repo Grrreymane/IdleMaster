@@ -90,7 +90,8 @@ function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefin
 function gearOf(S) { const g = {}; for (const s of SLOTS) if (S.slots[s.id].r >= 0) g[s.id] = S.slots[s.id].r; return g; }
 // ------------------------------------------------------------ small icons (DOM uses them as data URLs)
 const ICONS = {};
-function iconURL(k, make) { return ICONS[k] || (ICONS[k] = make().toDataURL()); }
+// file:// pages: a canvas that drew an img/ picture is 'tainted' and toDataURL throws -> fall back to an empty pixel
+function iconURL(k, make) { if (ICONS[k]) return ICONS[k]; let u; try { u = make().toDataURL(); } catch (e) { u = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='; } return (ICONS[k] = u); }
 const SLOT_ROWS = {
   horn: ['..X..X..', '.XX..XX.', '.X....X.', 'XX....XX', 'X......X', '.XXXXXX.'],
   claw: ['X..X..X.', 'X..X..X.', 'XX.XX.XX', '.XXXXXX.', '.XXXXXX.', '..XXXX..'],
@@ -121,6 +122,7 @@ const MISC_ROWS = {
 function miscIcon(k) { return iconURL('m' + k, () => rows(MISC_ROWS[k][0], MISC_ROWS[k][1])); }
 const MAT_COL = ['#7ac860', '#d0603a', '#a8c8e8', '#f0a8b8', '#c89a48', '#ff8a6a', '#8ad0b0', '#ffd040'];
 function matIcon(z) { return iconURL('mat' + z, () => rows(['..XX..', '.XYYX.', 'XYYYYX', 'XYYYXX', '.XXXX.'], { X: shade(MAT_COL[z], -60), Y: MAT_COL[z] })); }
-function formIcon(id, sil) {   // portrait thumbnail for the codex / evolution choice
+function formIcon(id, sil) {   // portrait thumbnail for the codex / evolution choice (drawn forms: the picture itself, CSS .sil darkens it)
+  if (PIX[id]) return 'img/' + id + '.png';
   return iconURL('form' + id + (sil ? 's' : ''), () => { const s = formSprite(id, {}); return sil ? s.sil : s.cv; });
 }
