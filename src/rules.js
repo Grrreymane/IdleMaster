@@ -40,7 +40,7 @@ const SLOTS = [
 const SLOT_I = Object.fromEntries(SLOTS.map((s, i) => [s.id, i]));
 // evolution forms: st = stage, next = what it can become, tr = trait (small passive)
 const FORMS = {   // one family: the Qiongqi line (穷奇), cute cub -> legendary winged tiger
-  f0: { n: '穷奇幼崽', st: 0, next: ['f1'], tr: { spd: .05 }, td: '虎崽好动：攻速 +5%' },
+  f0: { n: '翼虎幼崽', st: 0, next: ['f1'], tr: { spd: .05 }, td: '虎崽好动：攻速 +5%' },
   f1: { n: '小翼虎', st: 1, next: ['f2'], tr: { lvHeal: 1 }, td: '振翅：升级时回满生命' },
   f2: { n: '嗥虎', st: 2, next: ['f3'], tr: { gold: .1 }, td: '音如嗥狗：灵玉 +10%' },
   f3: { n: '赤翼虎', st: 3, next: ['f4'], tr: { crit: .05 }, td: '赤翼：暴击 +5%' },

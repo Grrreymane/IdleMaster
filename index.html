@@ -41,6 +41,7 @@
   .res { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
   .ic { width: 16px; height: 16px; image-rendering: pixelated; vertical-align: middle; flex: none; }
   .ic.b { width: 24px; height: 24px; }
+  .ic.sil { filter: brightness(0) opacity(.35); }
   #goal { flex: none; display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: #1e1729; border-bottom: 2px solid var(--line); min-height: 30px; }
   #goal .t { flex: 1; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #pane { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 6px 8px 10px; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
@@ -1156,7 +1157,7 @@ const SLOTS = [
 const SLOT_I = Object.fromEntries(SLOTS.map((s, i) => [s.id, i]));
 // evolution forms: st = stage, next = what it can become, tr = trait (small passive)
 const FORMS = {   // one family: the Qiongqi line (穷奇), cute cub -> legendary winged tiger
-  f0: { n: '穷奇幼崽', st: 0, next: ['f1'], tr: { spd: .05 }, td: '虎崽好动：攻速 +5%' },
+  f0: { n: '翼虎幼崽', st: 0, next: ['f1'], tr: { spd: .05 }, td: '虎崽好动：攻速 +5%' },
   f1: { n: '小翼虎', st: 1, next: ['f2'], tr: { lvHeal: 1 }, td: '振翅：升级时回满生命' },
   f2: { n: '嗥虎', st: 2, next: ['f3'], tr: { gold: .1 }, td: '音如嗥狗：灵玉 +10%' },
   f3: { n: '赤翼虎', st: 3, next: ['f4'], tr: { crit: .05 }, td: '赤翼：暴击 +5%' },
@@ -1457,11 +1458,15 @@ const LOOK = {
 const FSPR = new Map();
 // hand-finished sprites (AI draft -> tools/pixelize.py -> img/<key>.png) replace the procedural ones once loaded
 const ART_FILES = ['f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6'];
+for (let z = 0; z < 8; z++) for (let t = 0; t < 5; t++) ART_FILES.push('m' + z + '-' + t);
+for (let z = 0; z < 8; z++) ART_FILES.push('bg' + z);                                                          // zone backgrounds, 180 x 160
+for (const sl of ['horn', 'collar', 'armor', 'claw', 'tail', 'orb', 'rune']) for (let r = 0; r < 6; r++) ART_FILES.push('i-' + sl + '-' + r);   // item icons   // monsters: img/m<zone>-<tier>.png (4 = boss); missing ones fall back to code art
 const PIX = {};
 function loadPix() {
   for (const k of ART_FILES) {
     const im = new Image();
-    im.onload = () => { PIX[k] = im; FSPR.clear(); for (const e in ESPR) delete ESPR[e]; for (const i in ICONS) if (i.startsWith('form')) delete ICONS[i]; };
+    im.onload = () => { PIX[k] = im; FSPR.clear(); for (const e in ESPR) delete ESPR[e]; for (const i in ICONS) if (i.startsWith('form')) delete ICONS[i]; if (k.startsWith('bg')) delete BG[+k.slice(2)]; };
+    im.onerror = () => {};
     im.src = 'img/' + k + '.png';
   }
 }
@@ -1542,6 +1547,7 @@ const SLOT_ROWS = {
   rune: ['X.XXXX.X', '.X....X.', 'X.XYYX.X', 'X.XYYX.X', '.X....X.', 'X.XXXX.X'],
 };
 function slotIcon(slot, r) {
+  if (r >= 0 && PIX['i-' + slot + '-' + r]) return 'img/i-' + slot + '-' + r + '.png';
   return iconURL('s' + slot + r, () => {
     const c = r < 0 ? '#5a4c68' : RAR[r].c;
     return rows(SLOT_ROWS[slot], { X: c, Y: r < 0 ? '#6a5c78' : shade(c, 50) });
@@ -1661,6 +1667,7 @@ function ridge(x, seed, amp, freq) { let v = 0, a = 1, f = freq; for (let o = 0;
 function bgFor(z) {
   if (BG[z]) return BG[z];
   const Z = ZONES[z], c = mk(W, H), x = c.getContext('2d');
+  if (PIX['bg' + z]) { x.drawImage(PIX['bg' + z], 0, 0, W, H); return (BG[z] = c); }   // drawn background (img/bg<zone>.png)
   // sky: three bands with a narrow dithered seam
   const bands = [[0, 46], [46, 92], [92, H]];
   bands.forEach(([a, b], i) => { x.fillStyle = Z.sky[i]; x.fillRect(0, a, W, b - a); });
@@ -1991,7 +1998,7 @@ function paneBook() {
   h += `<div class="card"><h3>形态 ${Object.keys(S.forms).length}/${Object.keys(FORMS).length}</h3><div class="grid" style="grid-template-columns:repeat(4,1fr)">`;
   for (const id in FORMS) { const own = S.forms[id]; h += `<div style="text-align:center"><img style="width:100%;image-rendering:pixelated" src="${formIcon(id, !own)}"><div class="${own ? '' : 'dim'}">${own ? FORMS[id].n : '？？？'}</div></div>`; }
   h += '</div></div><div class="card"><h3>装备 ' + Object.keys(S.items).length + '/42</h3><div class="grid">';
-  for (let r = 0; r < 6; r++) for (const sl of SLOTS) { const own = S.items[sl.id + ':' + r]; h += `<div class="frame" style="border-color:${own ? RAR[r].c : '#000'}">${img(slotIcon(sl.id, own ? r : -1), 'b')}</div>`; }
+  for (let r = 0; r < 6; r++) for (const sl of SLOTS) { const own = S.items[sl.id + ':' + r]; h += `<div class="frame" style="border-color:${own ? RAR[r].c : '#000'}">${img(slotIcon(sl.id, PIX['i-' + sl.id + '-' + r] ? r : own ? r : -1), own ? 'b' : 'b sil')}</div>`; }
   h += '</div></div><div class="card"><h3>妖兽</h3>';
   for (let z = 0; z <= S.maxZone; z++) {
     h += `<div class="row" style="flex-wrap:wrap;gap:2px 8px"><span class="gold">${ZONES[z].n}</span>`;

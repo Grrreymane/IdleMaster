@@ -11,6 +11,7 @@ function ridge(x, seed, amp, freq) { let v = 0, a = 1, f = freq; for (let o = 0;
 function bgFor(z) {
   if (BG[z]) return BG[z];
   const Z = ZONES[z], c = mk(W, H), x = c.getContext('2d');
+  if (PIX['bg' + z]) { x.drawImage(PIX['bg' + z], 0, 0, W, H); return (BG[z] = c); }   // drawn background (img/bg<zone>.png)
   // sky: three bands with a narrow dithered seam
   const bands = [[0, 46], [46, 92], [92, H]];
   bands.forEach(([a, b], i) => { x.fillStyle = Z.sky[i]; x.fillRect(0, a, W, b - a); });

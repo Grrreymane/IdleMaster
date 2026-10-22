@@ -12,11 +12,15 @@ const LOOK = {
 const FSPR = new Map();
 // hand-finished sprites (AI draft -> tools/pixelize.py -> img/<key>.png) replace the procedural ones once loaded
 const ART_FILES = ['f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6'];
+for (let z = 0; z < 8; z++) for (let t = 0; t < 5; t++) ART_FILES.push('m' + z + '-' + t);
+for (let z = 0; z < 8; z++) ART_FILES.push('bg' + z);                                                          // zone backgrounds, 180 x 160
+for (const sl of ['horn', 'collar', 'armor', 'claw', 'tail', 'orb', 'rune']) for (let r = 0; r < 6; r++) ART_FILES.push('i-' + sl + '-' + r);   // item icons   // monsters: img/m<zone>-<tier>.png (4 = boss); missing ones fall back to code art
 const PIX = {};
 function loadPix() {
   for (const k of ART_FILES) {
     const im = new Image();
-    im.onload = () => { PIX[k] = im; FSPR.clear(); for (const e in ESPR) delete ESPR[e]; for (const i in ICONS) if (i.startsWith('form')) delete ICONS[i]; };
+    im.onload = () => { PIX[k] = im; FSPR.clear(); for (const e in ESPR) delete ESPR[e]; for (const i in ICONS) if (i.startsWith('form')) delete ICONS[i]; if (k.startsWith('bg')) delete BG[+k.slice(2)]; };
+    im.onerror = () => {};
     im.src = 'img/' + k + '.png';
   }
 }
@@ -97,6 +101,7 @@ const SLOT_ROWS = {
   rune: ['X.XXXX.X', '.X....X.', 'X.XYYX.X', 'X.XYYX.X', '.X....X.', 'X.XXXX.X'],
 };
 function slotIcon(slot, r) {
+  if (r >= 0 && PIX['i-' + slot + '-' + r]) return 'img/i-' + slot + '-' + r + '.png';
   return iconURL('s' + slot + r, () => {
     const c = r < 0 ? '#5a4c68' : RAR[r].c;
     return rows(SLOT_ROWS[slot], { X: c, Y: r < 0 ? '#6a5c78' : shade(c, 50) });
