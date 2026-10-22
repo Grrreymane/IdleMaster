@@ -18,15 +18,15 @@ function recalc() { DER = derive(S); dirty = false; }
 // ------------------------------------------------------------ events from the rules -> visuals, sounds, toasts
 function onEvent(type, d) {
   switch (type) {
-    case 'hit': FX.lunge = .16; FX.eHit = .12; SFX.hit(d.cr);
+    case 'hit': FX.lunge = LUNGE; FX.eHit = .12; FX.slash = SLASH; FX.slashCr = d.cr; SFX.hit(d.cr);
       if (S.f) { const e = enemySprite(S.f.z, S.f.t); pop(fmt(d.dmg) + (d.cr ? '!' : ''), W - 4 - e.w / 2 + rand(-6, 6), FLOOR - e.h + rand(4, 14), d.cr ? '#ffd040' : '#ffffff', d.cr ? 9 : 7); }
       if (d.flood) { pop('洪流', 120, 60, '#8ad0ff', 9); }
       break;
     case 'miss': pop('落空', 140, 80, '#c8c0d8', 7); break;
     case 'hurt': FX.hurt = .2; SFX.hurt(); pop('-' + fmt(d.dmg), 50 + rand(-8, 8), 70, d.heavy ? '#ff4a3a' : '#ff9a8a', d.heavy ? 10 : 7); if (d.heavy) SFX.heavy(); break;
     case 'kill': {
-      const e = enemySprite(d.z, d.t); FX.eDie = .35; FX.eDieSpr = e; FX.eDieX = W - 4 - e.w; SFX.kill();
-      for (let i = 0; i < 6; i++) part(W - 4 - e.w / 2, FLOOR - e.h / 2, rand(-20, 20), rand(-30, -5), MAT_COL[d.z], .8);
+      const e = enemySprite(d.z, d.t); FX.eDie = EDIE; FX.eDieSpr = e; FX.eDieX = W - 4 - e.w; FX.slash = 0; SFX.kill();
+      for (let i = 0; i < 8; i++) part(W - 4 - e.w / 2 + rand(-e.w / 3, e.w / 3), FLOOR - 2, rand(-14, 14), rand(-18, -4), i & 1 ? '#c8b8a0' : MAT_COL[d.z], .7);   // dust + a glint of the zone material
       pop('+' + fmt(d.gold), 150, 46, '#9af0c0', 6, .8); dirty = true; break;
     }
     case 'level': SFX.level(); pop('升级! Lv' + d, 54, 40, '#ffe080', 9, 1.3); dirty = true; break;
@@ -35,7 +35,7 @@ function onEvent(type, d) {
       for (let i = 0; i < 10; i++) part(60 + rand(-20, 20), 100 + rand(-20, 10), rand(-15, 15), rand(-40, -10), RAR[d.r].c, 1.2); break;
     case 'dup': toast(`<span class="r${d.r}">${itemName(d.id)}</span> 重复，换成灵玉 +${fmt(d.gold)}`); break;
     case 'death': toast('<span class="bad">被打倒了</span>，退回一档'); break;
-    case 'spawn': if (d.t === 4) { SFX.boss(); toast(`<span class="gold">${ZONES[d.z].boss}</span>：${ZONES[d.z].intro}`); toast(`<span class="dim">规则：</span>${ZONES[d.z].rule}`); } break;
+    case 'spawn': FX.eIn = EIN; if (d.t === 4) { SFX.boss(); toast(`<span class="gold">${ZONES[d.z].boss}</span>：${ZONES[d.z].intro}`); toast(`<span class="dim">规则：</span>${ZONES[d.z].rule}`); } break;
     case 'bossFail': SFX.bossFail(); toast(d.why === 'time' ? '<span class="bad">时间到</span>，大妖退回了' : '<span class="bad">败给了大妖</span>，强化后再来'); bossOdds.k = null; break;
     case 'bossWin': onBossWin(d); break;
     case 'revive': pop('复活!', 150, 60, '#ff6a4a', 9); break;
@@ -119,7 +119,7 @@ window.addEventListener('resize', layout); if (window.visualViewport) window.vis
 }, { passive: false }));
 window.addEventListener('contextmenu', e => e.preventDefault());
 ['pointerup', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, () => initAudio()));
-document.getElementById('c').addEventListener('click', () => { initAudio(); FX.lunge = .16; pop(pick(['吼！', '嗷呜', '呜—']), 70, 44, '#ffffff', 8); });
+document.getElementById('c').addEventListener('click', () => { initAudio(); FX.lunge = LUNGE; pop(pick(['吼！', '嗷呜', '呜—']), 70, 44, '#ffffff', 8); });
 // ------------------------------------------------------------ simulation driving
 function advance(dt) {   // dt seconds of game time, in small steps
   while (dt > 0) { const d = Math.min(.05, dt); dt -= d; step(S, d, onEvent, DER); if (dirty) recalc(); }
@@ -155,7 +155,7 @@ function boot() {
   loadPix();
   const o = loadGame();
   if (o) { S = o.S; recalc(); const gap = (Date.now() - (o.ts || Date.now())) / 1000; if (gap > 60) offlineReport(gap); }
-  else { S = fresh(); recalc(); setTimeout(() => { toast('你是一只小小的<span class="gold">狌狌</span>'); toast('自动战斗 · 吞噬 · 进化'); }, 600); }
+  else { S = fresh(); recalc(); setTimeout(() => { toast('你是一只小小的<span class="gold">翼虎幼崽</span>'); toast('自动战斗 · 吞噬 · 进化'); }, 600); }
   layout(); renderUI();
 }
 if (location.hash === '#cover') { loadPix(); (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(renderCover, 800)); window.__gameBooted = true; return; }

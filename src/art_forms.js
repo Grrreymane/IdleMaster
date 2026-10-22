@@ -72,7 +72,7 @@ function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefin
   if (PIX[id]) {
     const cv = pixCanvas(PIX[id]), a = ANCH[id], g = Object.assign({}, gearR || {}); delete g.orb;
     pixGear(cv, id, g);
-    c = { cv, A: a ? { orb: [cv.ox + a.orb[0], cv.oy + a.orb[1]] } : {}, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff') };
+    c = { cv, A: a ? { orb: [cv.ox + a.orb[0], cv.oy + a.orb[1]] } : {}, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff'), red: tintC(cv, '#ff3a2a', .55) };
     FSPR.set(key, c); return c;
   }
   const f = LOOK[id] || LOOK.f0, g = Object.assign({}, gearR || {}); delete g.orb;
@@ -84,7 +84,7 @@ function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefin
     for (let k = 0; k < 14; k++) { x.fillRect(R(wx + k), R(wy + Math.sin(k * .45) * 2 + k * .25), 1, 1); x.fillRect(R(wx + k * .9), R(wy + 3 + Math.sin(k * .45 + 1) * 2 + k * .35), 1, 1); }
   }
   // breathing: split at the leg line so the body can rise a pixel
-  c = { cv, A: out.A, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff') };
+  c = { cv, A: out.A, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff'), red: tintC(cv, '#ff3a2a', .55) };
   FSPR.set(key, c); return c;
 }
 function gearOf(S) { const g = {}; for (const s of SLOTS) if (S.slots[s.id].r >= 0) g[s.id] = S.slots[s.id].r; return g; }

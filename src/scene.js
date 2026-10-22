@@ -75,7 +75,8 @@ function enemySprite(z, t) {
   return (ESPR[k] = { l, w: l.width, h: l.height, white: tintC(l, '#ffffff'), red: tintC(l, '#ff4a3a', .45), sil: tintC(l, '#2a2038') });
 }
 // ------------------------------------------------------------ live state of the stage
-const FX = { lunge: 0, hurt: 0, eHit: 0, eDie: 0, eDieSpr: null, eDieX: 0, evo: 0, evoFrom: null, warn: 0, flood: 0, rel: 0 };
+const FX = { lunge: 0, hurt: 0, eHit: 0, eDie: 0, eDieSpr: null, eDieX: 0, evo: 0, evoFrom: null, warn: 0, flood: 0, rel: 0, slash: 0, slashCr: false, eIn: 0 };
+const LUNGE = .24, SLASH = .2, EDIE = .4, EIN = .35;
 const POPS = [], PARTS = [];
 function pop(s, x, y, col, size, life) { if (POPS.length > 14) POPS.shift(); POPS.push({ s, x, y, col: col || '#ffffff', size: size || 8, life: life || .9, max: life || .9 }); }
 function part(x, y, vx, vy, col, life, sz) { if (PARTS.length > 120) PARTS.shift(); PARTS.push({ x, y, vx, vy, col, life, max: life, sz: sz || 1 }); }
@@ -88,7 +89,7 @@ function hpBar(x, y, w, h, f, col, back) {
   g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x, y, Math.max(0, Math.round(w * clamp(f, 0, 1))), 1);
 }
 function updateFX(dt) {
-  for (const k of ['lunge', 'hurt', 'eHit', 'eDie', 'warn', 'flood', 'rel']) if (FX[k] > 0) FX[k] = Math.max(0, FX[k] - dt);
+  for (const k of ['lunge', 'hurt', 'eHit', 'eDie', 'warn', 'flood', 'rel', 'slash', 'eIn']) if (FX[k] > 0) FX[k] = Math.max(0, FX[k] - dt);
   if (FX.evo > 0) FX.evo = Math.max(0, FX.evo - dt);
   for (let i = POPS.length - 1; i >= 0; i--) { const p = POPS[i]; p.life -= dt; p.y -= 12 * dt; if (p.life <= 0) POPS.splice(i, 1); }
   for (let i = PARTS.length - 1; i >= 0; i--) { const p = PARTS[i]; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 20 * dt; if (p.life <= 0) PARTS.splice(i, 1); }
@@ -106,8 +107,9 @@ function drawStage(T) {
   }
   // the beast
   const D = DER, spr = formSprite(S.form, gearOf(S));
-  const breath = Math.sin(T * 2.2) > 0 ? 1 : 0, lunge = FX.lunge > 0 ? Math.round(Math.sin(FX.lunge / .16 * Math.PI) * 4) : 0;
-  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge, by = FLOOR - GY;   // wide sprites slide left so the enemy stays clear
+  const breath = Math.sin(T * 2.4) > .2 ? 1 : 0, lp = FX.lunge > 0 ? 1 - FX.lunge / LUNGE : 1;
+  const lunge = FX.lunge > 0 ? R(lp < .3 ? -lp / .3 * 2 : Math.sin((lp - .3) / .7 * Math.PI) * 6) : 0, knock = FX.hurt > .1 ? -1 : 0;
+  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge + knock, by = FLOOR - GY;   // wide sprites slide left so the enemy stays clear
   // shadow
   g.globalAlpha = .28; g.fillStyle = '#000'; g.fillRect(bx + 22, FLOOR - 1, 70, 3); g.globalAlpha = 1;
   // rarity aura: motes rising for each ornate (r >= 3) item worn
@@ -115,10 +117,11 @@ function drawStage(T) {
   if (ornate && Math.random() < ornate * .04) { const r = Math.max(...SLOTS.map(s => S.slots[s.id].r)); part(bx + 30 + Math.random() * 60, FLOOR - 10 - Math.random() * 40, 0, -8, RAR[r].c, 1.6); }
   const dead = S.dead > 0, img = FX.evo > 1.2 ? spr.white : spr.cv;
   if (dead) g.globalAlpha = .35;
-  const cut = GY - 22;   // rows below this are legs: they stay put while the body breathes
-  g.drawImage(img, bx, by);   // whole body first, so the breathing shift never opens a seam
+  // breathing: everything above the paws rises a pixel; the only stretched row is just above the ground, so it reads as legs straightening
+  const cut = GY - 3;
+  g.drawImage(img, bx, by);
   g.drawImage(img, 0, 0, spr.w, cut, bx, by - breath, spr.w, cut);
-  if (FX.hurt > 0) { g.globalAlpha = .45 * FX.hurt / .2; g.drawImage(spr.white, bx, by - breath); }
+  if (FX.hurt > 0) { g.globalAlpha = .35 * FX.hurt / .2; g.drawImage(spr.red, bx, by - breath); }
   g.globalAlpha = 1;
   // floating orb
   const orbR = S.slots.orb.r;
@@ -129,9 +132,11 @@ function drawStage(T) {
   }
   // the enemy
   if (S.f && !dead) {
-    const e = enemySprite(S.f.z, S.f.t), ex = W - 4 - e.w + (FX.eHit > 0 ? 2 : 0), ey = FLOOR + 1 - e.h;
+    const e = enemySprite(S.f.z, S.f.t), ein = FX.eIn > 0 ? FX.eIn / EIN : 0, ex = W - 4 - e.w + (FX.eHit > 0 ? R(FX.eHit / .12 * 3) : 0) + R(ein * ein * (e.w + 10)), ey = FLOOR + 1 - e.h;   // a new foe walks in from the right
     g.globalAlpha = .28; g.fillStyle = '#000'; g.fillRect(ex + 4, FLOOR - 1, e.w - 8, 3); g.globalAlpha = 1;
-    g.drawImage(FX.eHit > .06 ? e.white : e.l, ex, ey);
+    g.drawImage(e.l, ex, ey);
+    if (FX.eHit > 0) { g.globalAlpha = .5 * FX.eHit / .12; g.drawImage(e.red, ex, ey); g.globalAlpha = 1; }
+    if (FX.slash > 0) slashFX(ex + e.w / 2, ey + e.h * .45, Math.min(e.w, e.h) * .45, 1 - FX.slash / SLASH, FX.slashCr);
     if (S.f.poison > 0) { g.globalAlpha = .4; g.drawImage(e.red, ex, ey); g.globalAlpha = 1; }
     const ew = Math.min(70, Math.max(40, e.w)), hx = W - 6 - ew, hy = Math.max(16, ey - 9);
     hpBar(hx, hy, ew, 3, S.f.hp / S.f.max, boss ? '#ff5a3a' : '#e04848');
@@ -148,7 +153,12 @@ function drawStage(T) {
       if (S.f.z === 2) txt('贪 ×' + (1 + S.f.hits * .05).toFixed(2), hx + ew / 2, hy + 9, 6, '#ffd27a');
     }
   }
-  if (FX.eDie > 0 && FX.eDieSpr) { g.globalAlpha = FX.eDie / .35; g.drawImage(FX.eDieSpr.white, FX.eDieX, FLOOR + 1 - FX.eDieSpr.h); g.globalAlpha = 1; }
+  if (FX.eDie > 0 && FX.eDieSpr) {   // sinks into the ground and fades
+    const k = 1 - FX.eDie / EDIE, d = FX.eDieSpr, sink = R(k * k * 10);
+    g.save(); g.beginPath(); g.rect(0, 0, W, FLOOR + 1); g.clip();
+    g.globalAlpha = 1 - k; g.drawImage(d.l, FX.eDieX, FLOOR + 1 - d.h + sink); g.globalAlpha = .4 * (1 - k); g.drawImage(d.sil, FX.eDieX, FLOOR + 1 - d.h + sink);
+    g.restore(); g.globalAlpha = 1;
+  }
   if (dead) txt('复活中…', 54, 96, 8, '#ffffff');
   // particles
   for (const p of PARTS) { g.globalAlpha = clamp(p.life / p.max * 1.5, 0, 1); g.fillStyle = p.col; g.fillRect(Math.round(p.x), Math.round(p.y), p.sz, p.sz); }
@@ -164,6 +174,20 @@ function drawStage(T) {
   hpBar(6, FLOOR + 3, 70, 3, S.hp / D.hp, '#58d070', '#1a3a24');
   txt(ZONES[z].n + ' · ' + (boss ? '大妖' : TIER_N[S.tier] + '档'), 4, 8, 8, '#ffffff', 'left');
   for (const p of POPS) txt(p.s, p.x, p.y, p.size, p.col, 'center', OUT, Math.min(1, p.life / p.max * 2));
+}
+function slashFX(cx, cy, r, k, cr) {   // three claw marks sweeping down-left across the target
+  const col = cr ? '#ffe070' : '#ffffff', a = k < .15 ? k / .15 : 1 - (k - .15) / .85, len = Math.min(1, k * 2.5);
+  g.globalAlpha = clamp(a, 0, 1);
+  for (let i = -1; i <= 1; i++) {
+    const ox = i * r * .35, oy = -i * r * .15;
+    for (let t = 0; t < len; t += .04) {
+      const x = cx + ox + r * (.6 - t * 1.2), y = cy + oy + r * (-.7 + t * 1.4), w = t > .12 && t < .88 ? 2 : 1;
+      g.fillStyle = '#3a1020'; g.fillRect(R(x) - 1, R(y), w + 1, w + 1);   // dark edge so the mark reads on pale foes too
+      g.fillStyle = col; g.fillRect(R(x), R(y), w, w);
+      if (cr) { g.fillStyle = '#ff9a3a'; g.fillRect(R(x) + 1, R(y) + 1, 1, 1); }
+    }
+  }
+  g.globalAlpha = 1;
 }
 function disc(x, y, r, col) {
   x = R(x); y = R(y); g.fillStyle = col;
