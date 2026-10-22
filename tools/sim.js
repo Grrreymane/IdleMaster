@@ -50,7 +50,7 @@ function run(who, seed, nirRuns) {
   const lines = ['fox', 'fierce', 'dragon', 'auspicious'];
   const act = () => {
     // evolve first
-    if (R.canEvolve(S)) { const p0 = R.derive(S).power; R.evolve(S, 'f' + (S.stage + 1)); const p1 = R.derive(S).power; log.evo.push({ t, stage: S.stage, jump: p1 / p0 }); log.firstMin.push(t); dirty = true; }
+    if (R.canEvolve(S)) { const p0 = R.derive(S).power; const nx = R.FORMS[S.form].next; R.evolve(S, nx[Math.floor(Math.random() * nx.length)]); const p1 = R.derive(S).power; log.evo.push({ t, stage: S.stage, jump: p1 / p0 }); log.firstMin.push(t); dirty = true; }
     // reserve materials for the next evolution once its level + boss conditions are met
     const en = R.evoNeed(S), resv = en && S.lv >= en.lv - 2 && (en.boss < 0 || S.bossWins[en.boss]) ? en : null;
     for (let g = 0; g < 400; g++) {

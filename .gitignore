@@ -3,3 +3,4 @@ _bot.js
 .shots/
 __pycache__/
 _lab/
+.claude/
