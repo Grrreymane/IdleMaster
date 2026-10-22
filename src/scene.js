@@ -109,7 +109,7 @@ function drawStage(T) {
   const D = DER, spr = formSprite(S.form, gearOf(S));
   const breath = Math.sin(T * 2.4) > .2 ? 1 : 0, lp = FX.lunge > 0 ? 1 - FX.lunge / LUNGE : 1;
   const lunge = FX.lunge > 0 ? R(lp < .3 ? -lp / .3 * 2 : Math.sin((lp - .3) / .7 * Math.PI) * 6) : 0, knock = FX.hurt > .1 ? -1 : 0;
-  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge + knock, by = FLOOR - GY;   // wide sprites slide left so the enemy stays clear
+  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge + knock, by = FLOOR - spr.gy;   // wide sprites slide left so the enemy stays clear
   // shadow
   g.globalAlpha = .28; g.fillStyle = '#000'; g.fillRect(bx + 22, FLOOR - 1, 70, 3); g.globalAlpha = 1;
   // rarity aura: motes rising for each ornate (r >= 3) item worn
@@ -118,7 +118,7 @@ function drawStage(T) {
   const dead = S.dead > 0, img = FX.evo > 1.2 ? spr.white : spr.cv;
   if (dead) g.globalAlpha = .35;
   // breathing: everything above the paws rises a pixel; the only stretched row is just above the ground, so it reads as legs straightening
-  const cut = GY - 3;
+  const cut = spr.gy - 3;
   g.drawImage(img, bx, by);
   g.drawImage(img, 0, 0, spr.w, cut, bx, by - breath, spr.w, cut);
   if (FX.hurt > 0) { g.globalAlpha = .35 * FX.hurt / .2; g.drawImage(spr.red, bx, by - breath); }

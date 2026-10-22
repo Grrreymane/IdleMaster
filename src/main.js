@@ -80,6 +80,7 @@ document.addEventListener('click', e => {
   const a = b.dataset.act, v = b.dataset.v;
   initAudio();
   if (HAND.key && b.dataset.k === HAND.key) { HAND.key = null; b.classList.remove('glow', 'guide'); }
+  tutClick(a);
   switch (a) {
     case 'tab': SFX.click(); setTab(v); break;
     case 'go': { SFX.click(); const [t, k] = v.split(':'); goTo(t, k); break; }
@@ -142,7 +143,7 @@ function frame(now) {
     else { const dt = clamp(real, 0, .05); T += dt; advance(dt); }
     updateFX(Math.min(real, .5)); drawStage(T); present(); musicTick(S.f && S.f.t === 4);
     uiT -= real; if (uiT <= 0) { uiT = .25; renderUI(); }
-    updateHand();
+    updateHand(); updateTut(Math.min(real, .5));
     saveT -= real; if (saveT <= 0) { saveT = 10; saveGame(); }
     S.stats.play += Math.min(real, 2);
     frameErr = 0;

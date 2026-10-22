@@ -24,22 +24,22 @@ function loadPix() {
     im.src = 'img/' + k + '.png';
   }
 }
-function pixCanvas(im) {   // an image as a sprite canvas: centred on the QW box, feet on GY
-  const w = Math.max(QW, im.width), c = mk(w, QH), x = c.getContext('2d');
-  c.ox = Math.round((w - im.width) / 2); c.oy = GY + 1 - im.height;
+function pixCanvas(im) {   // an image as a sprite canvas: centred on the QW box, feet on the ground line (taller pictures get a taller canvas)
+  const w = Math.max(QW, im.width), h = Math.max(QH, im.height + QH - GY), c = mk(w, h), x = c.getContext('2d');
+  c.gy = h - (QH - GY); c.ox = Math.round((w - im.width) / 2); c.oy = c.gy + 1 - im.height;
   x.drawImage(im, c.ox, c.oy); return c;
 }
 // where gear goes on each drawn sprite, in the image's own pixels (measured on tools/anchors.py sheets)
 // head: top of the skull (gear horns), brow: forehead, neck: under the jaw, back: saddle centre [x, y, width],
 // paw: front paw on the ground, tail: tail tip, orb: where the spirit orb floats, horns: the form has its own horns, s: gear scale
 const ANCH = {
-  f0: { head: [32, 4], brow: [34, 10], neck: [34, 28], back: [17, 25, 10], paw: [38, 38], tail: [2, 26], orb: [46, -4], s: .5 },
-  f1: { head: [38, 3], brow: [40, 8], neck: [38, 26], back: [20, 28, 10], paw: [47, 38], tail: [3, 24], orb: [52, -4], s: .55 },
-  f2: { head: [44, 3], brow: [46, 10], neck: [46, 33], back: [24, 34, 12], paw: [46, 54], tail: [3, 33], orb: [58, -6], s: .62, horns: 1 },
-  f3: { head: [56, 5], brow: [58, 14], neck: [56, 37], back: [34, 36, 14], paw: [60, 64], tail: [2, 42], orb: [70, -4], s: .72, horns: 1 },
-  f4: { head: [70, 18], brow: [72, 28], neck: [66, 50], back: [46, 46, 14], paw: [66, 74], tail: [12, 50], orb: [84, 8], s: .82, horns: 1 },
-  f5: { head: [86, 28], brow: [86, 36], neck: [80, 64], back: [56, 52, 18], paw: [96, 82], tail: [6, 52], orb: [100, 6], s: .9, horns: 1 },
-  f6: { head: [96, 40], brow: [96, 46], neck: [90, 72], back: [62, 66, 20], paw: [110, 92], tail: [12, 70], orb: [118, 18], s: 1, horns: 1 },
+  f0: { head: [38, 3], brow: [40, 10], neck: [38, 29], back: [20, 28, 10], paw: [36, 43], tail: [2, 30], orb: [52, -4], s: .55 },
+  f1: { head: [44, 2], brow: [46, 8], neck: [44, 27], back: [24, 30, 10], paw: [51, 38], tail: [2, 24], orb: [56, -4], s: .6 },
+  f2: { head: [48, 2], brow: [50, 9], neck: [47, 30], back: [26, 32, 12], paw: [49, 56], tail: [2, 35], orb: [62, -6], s: .65, horns: 1 },
+  f3: { head: [62, 6], brow: [62, 12], neck: [58, 38], back: [34, 40, 14], paw: [60, 71], tail: [2, 48], orb: [78, -4], s: .78, horns: 1 },
+  f4: { head: [76, 22], brow: [78, 30], neck: [70, 52], back: [48, 50, 14], paw: [73, 80], tail: [8, 55], orb: [88, 8], s: .85, horns: 1 },
+  f5: { head: [88, 26], brow: [90, 38], neck: [82, 66], back: [55, 58, 18], paw: [100, 87], tail: [4, 55], orb: [106, 6], s: .95, horns: 1 },
+  f6: { head: [108, 40], brow: [110, 47], neck: [98, 80], back: [62, 72, 22], paw: [124, 104], tail: [14, 78], orb: [128, 20], s: 1.05, horns: 1 },
 };
 function plateG(G, r, x, y, w, S) {   // armour on a sprite: a domed scale pauldron on the shoulder (rows of overlapping scales)
   const P = ramp(RAR[r].c), rx = w / 2, ry = w * .42;
@@ -72,7 +72,7 @@ function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefin
   if (PIX[id]) {
     const cv = pixCanvas(PIX[id]), a = ANCH[id], g = Object.assign({}, gearR || {}); delete g.orb;
     pixGear(cv, id, g);
-    c = { cv, A: a ? { orb: [cv.ox + a.orb[0], cv.oy + a.orb[1]] } : {}, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff'), red: tintC(cv, '#ff3a2a', .55) };
+    c = { cv, A: a ? { orb: [cv.ox + a.orb[0], cv.oy + a.orb[1]] } : {}, w: cv.width, h: cv.height, gy: cv.gy, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff'), red: tintC(cv, '#ff3a2a', .55) };
     FSPR.set(key, c); return c;
   }
   const f = LOOK[id] || LOOK.f0, g = Object.assign({}, gearR || {}); delete g.orb;
@@ -84,7 +84,7 @@ function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefin
     for (let k = 0; k < 14; k++) { x.fillRect(R(wx + k), R(wy + Math.sin(k * .45) * 2 + k * .25), 1, 1); x.fillRect(R(wx + k * .9), R(wy + 3 + Math.sin(k * .45 + 1) * 2 + k * .35), 1, 1); }
   }
   // breathing: split at the leg line so the body can rise a pixel
-  c = { cv, A: out.A, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff'), red: tintC(cv, '#ff3a2a', .55) };
+  c = { cv, A: out.A, w: cv.width, h: cv.height, gy: GY, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff'), red: tintC(cv, '#ff3a2a', .55) };
   FSPR.set(key, c); return c;
 }
 function gearOf(S) { const g = {}; for (const s of SLOTS) if (S.slots[s.id].r >= 0) g[s.id] = S.slots[s.id].r; return g; }

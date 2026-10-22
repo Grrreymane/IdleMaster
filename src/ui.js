@@ -189,6 +189,7 @@ function updateHand() {
   if (!el) { elHand.style.display = 'none'; return; }
   if (!el.classList.contains('glow')) el.classList.add('glow', 'guide');
   const r = el.getBoundingClientRect();
+  if (elHand.textContent !== '👆') elHand.textContent = '👆';
   elHand.style.display = 'block'; elHand.style.left = (r.left + r.width / 2 - 6) + 'px'; elHand.style.top = (r.bottom - 6) + 'px';
 }
 function setTab(t) {
