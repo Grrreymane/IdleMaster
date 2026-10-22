@@ -3,17 +3,18 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const low = mk(W, H);
 let g = low.getContext('2d');
 let K = 2;                                    // device pixels per logical pixel (set by layout())
-const FLOOR = 150;                            // feet line on the stage
+const FLOOR = 118;                            // feet line on the stage
+const BGH = 160, BG_OFF = 32;                 // backgrounds are 180 x 160; the stage shows them from y = 32 (a little less sky)
 // ------------------------------------------------------------ backgrounds (cached per zone)
 const BG = {};
 function hash(n) { n = (n ^ 61) ^ (n >>> 16); n = n + (n << 3); n = n ^ (n >>> 4); n = Math.imul(n, 0x27d4eb2d); n = n ^ (n >>> 15); return (n >>> 0) / 4294967296; }
 function ridge(x, seed, amp, freq) { let v = 0, a = 1, f = freq; for (let o = 0; o < 4; o++) { v += Math.sin(x * f + seed * 7.3 + o * 1.7) * a; a *= .5; f *= 2.1; } return v * amp; }
 function bgFor(z) {
   if (BG[z]) return BG[z];
-  const Z = ZONES[z], c = mk(W, H), x = c.getContext('2d');
-  if (PIX['bg' + z]) { x.drawImage(PIX['bg' + z], 0, 0, W, H); return (BG[z] = c); }   // drawn background (img/bg<zone>.png)
+  const Z = ZONES[z], c = mk(W, BGH), x = c.getContext('2d');
+  if (PIX['bg' + z]) { x.drawImage(PIX['bg' + z], 0, 0, W, BGH); return (BG[z] = c); }   // drawn background (img/bg<zone>.png)
   // sky: three bands with a narrow dithered seam
-  const bands = [[0, 46], [46, 92], [92, H]];
+  const bands = [[0, 46], [46, 92], [92, BGH]];
   bands.forEach(([a, b], i) => { x.fillStyle = Z.sky[i]; x.fillRect(0, a, W, b - a); });
   for (let i = 1; i < 3; i++) { const y0 = bands[i][0]; x.fillStyle = Z.sky[i - 1]; for (let y = y0; y < y0 + 4; y++) for (let xx = 0; xx < W; xx++) if (BAYER[y & 3][xx & 3] / 16 > (y - y0 + .5) / 4) x.fillRect(xx, y, 1, 1); }
   if (Z.deco === 'sun') { for (let i = 0; i < 10; i++) { const sx = 12 + i * 17, sy = 14 + (i % 3) * 7; x.fillStyle = '#ff9a3a'; x.beginPath(); x.arc(sx, sy, 4, 0, 7); x.fill(); x.fillStyle = '#ffe080'; x.fillRect(sx - 1, sy - 2, 2, 2); } }
@@ -22,7 +23,7 @@ function bgFor(z) {
   const layer = (base, amp, freq, col, seed, snow) => {
     for (let xx = 0; xx < W; xx++) {
       const top = Math.round(base + ridge(xx, seed, amp, freq));
-      x.fillStyle = col; x.fillRect(xx, top, 1, H - top);
+      x.fillStyle = col; x.fillRect(xx, top, 1, BGH - top);
       x.fillStyle = shade(col, 18); x.fillRect(xx, top, 1, 1);
       if (snow && top < base - amp * .3) { x.fillStyle = '#f8f8ff'; x.fillRect(xx, top, 1, 3); }
     }
@@ -32,7 +33,7 @@ function bgFor(z) {
   if (z === 3 || z === 5) { x.fillStyle = Z.mid; x.fillRect(0, 112, W, 30); x.fillStyle = shade(Z.mid, 30); for (let i = 0; i < 30; i++) x.fillRect(Math.floor(hash(i + z) * W), 114 + Math.floor(hash(i * 5 + z) * 24), 4 + Math.floor(hash(i * 9) * 6), 1); }
   layer(128, 6, .07, Z.near, z * 3 + 3);
   // ground with a lit lip and speckles
-  x.fillStyle = Z.ground; x.fillRect(0, 140, W, H - 140);
+  x.fillStyle = Z.ground; x.fillRect(0, 140, W, BGH - 140);
   x.fillStyle = shade(Z.ground, 22); x.fillRect(0, 140, W, 1);
   x.fillStyle = Z.soil; for (let i = 0; i < 70; i++) x.fillRect(Math.floor(hash(i * 13 + z) * W), 143 + Math.floor(hash(i * 17 + z) * 16), 1 + (i & 1), 1);
   // decorations
@@ -98,11 +99,11 @@ function drawStage(T) {
   TQ.length = 0;
   g.imageSmoothingEnabled = false; g.globalAlpha = 1;
   const z = S.f ? S.f.z : S.zone, boss = S.f && S.f.t === 4;
-  g.drawImage(bgFor(z), 0, 0);
+  g.drawImage(bgFor(z), 0, -BG_OFF);
   // drifting clouds / snow / embers
   for (let i = 0; i < 4; i++) {
     const cx = ((i * 61 + T * (3 + i)) % (W + 40)) - 20, cy = 10 + i * 9;
-    if (z === 2) { g.fillStyle = '#ffffff'; for (let k = 0; k < 6; k++) g.fillRect(Math.floor((i * 37 + k * 29 + T * 6) % W), Math.floor((k * 23 + i * 11 + T * (10 + k)) % 140), 1, 1); }
+    if (z === 2) { g.fillStyle = '#ffffff'; for (let k = 0; k < 6; k++) g.fillRect(Math.floor((i * 37 + k * 29 + T * 6) % W), Math.floor((k * 23 + i * 11 + T * (10 + k)) % 110), 1, 1); }
     else if (z !== 6 && z !== 7) { g.globalAlpha = .55; g.fillStyle = '#ffffff'; g.fillRect(Math.round(cx), cy, 14, 2); g.fillRect(Math.round(cx) + 3, cy - 1, 7, 1); g.globalAlpha = 1; }
   }
   // the beast
@@ -159,7 +160,7 @@ function drawStage(T) {
     g.globalAlpha = 1 - k; g.drawImage(d.l, FX.eDieX, FLOOR + 1 - d.h + sink); g.globalAlpha = .4 * (1 - k); g.drawImage(d.sil, FX.eDieX, FLOOR + 1 - d.h + sink);
     g.restore(); g.globalAlpha = 1;
   }
-  if (dead) txt('复活中…', 54, 96, 8, '#ffffff');
+  if (dead) txt('复活中…', 54, 70, 8, '#ffffff');
   // particles
   for (const p of PARTS) { g.globalAlpha = clamp(p.life / p.max * 1.5, 0, 1); g.fillStyle = p.col; g.fillRect(Math.round(p.x), Math.round(p.y), p.sz, p.sz); }
   g.globalAlpha = 1;
@@ -167,7 +168,7 @@ function drawStage(T) {
   if (FX.evo > 0) {
     const k = FX.evo / 3, a = Math.sin(Math.min(1, (1 - k) * 2) * Math.PI / 2) * (k < .3 ? k / .3 : 1);
     g.globalAlpha = .35 * a; g.fillStyle = '#fff4c0';
-    for (let i = 0; i < 12; i++) { const ang = i / 12 * Math.PI * 2 + T * .4; for (let r = 10; r < 90; r += 2) g.fillRect(Math.round(56 + Math.cos(ang) * r), Math.round(100 + Math.sin(ang) * r * .7), 2, 2); }
+    for (let i = 0; i < 12; i++) { const ang = i / 12 * Math.PI * 2 + T * .4; for (let r = 10; r < 90; r += 2) g.fillRect(Math.round(56 + Math.cos(ang) * r), Math.round(74 + Math.sin(ang) * r * .7), 2, 2); }
     g.globalAlpha = 1;
   }
   // beast HP + header

@@ -22,8 +22,8 @@ function onEvent(type, d) {
       if (S.f) { const e = enemySprite(S.f.z, S.f.t); pop(fmt(d.dmg) + (d.cr ? '!' : ''), W - 4 - e.w / 2 + rand(-6, 6), FLOOR - e.h + rand(4, 14), d.cr ? '#ffd040' : '#ffffff', d.cr ? 9 : 7); }
       if (d.flood) { pop('洪流', 120, 60, '#8ad0ff', 9); }
       break;
-    case 'miss': pop('落空', 140, 80, '#c8c0d8', 7); break;
-    case 'hurt': FX.hurt = .2; SFX.hurt(); pop('-' + fmt(d.dmg), 50 + rand(-8, 8), 70, d.heavy ? '#ff4a3a' : '#ff9a8a', d.heavy ? 10 : 7); if (d.heavy) SFX.heavy(); break;
+    case 'miss': pop('落空', 140, 56, '#c8c0d8', 7); break;
+    case 'hurt': FX.hurt = .2; SFX.hurt(); pop('-' + fmt(d.dmg), 50 + rand(-8, 8), 52, d.heavy ? '#ff4a3a' : '#ff9a8a', d.heavy ? 10 : 7); if (d.heavy) SFX.heavy(); break;
     case 'kill': {
       const e = enemySprite(d.z, d.t); FX.eDie = EDIE; FX.eDieSpr = e; FX.eDieX = W - 4 - e.w; FX.slash = 0; SFX.kill();
       for (let i = 0; i < 8; i++) part(W - 4 - e.w / 2 + rand(-e.w / 3, e.w / 3), FLOOR - 2, rand(-14, 14), rand(-18, -4), i & 1 ? '#c8b8a0' : MAT_COL[d.z], .7);   // dust + a glint of the zone material
@@ -109,7 +109,7 @@ function layout() {
   app.style.transform = `scale(${SCALE})`; app.style.height = h + 'px';
   app.style.left = Math.max(0, (vw - 360 * SCALE) / 2) + 'px';
   const dpr = Math.min(3, window.devicePixelRatio || 1);
-  cv.width = Math.round(360 * SCALE * dpr); cv.height = Math.round(320 * SCALE * dpr); K = cv.width / W;
+  cv.width = Math.round(360 * SCALE * dpr); cv.height = Math.round(256 * SCALE * dpr); K = cv.width / W;
   TXC.clear(); layoutModal();
 }
 function layoutModal() { elMbox.style.transform = `scale(${SCALE}) translate(-50%, -50%)`; }

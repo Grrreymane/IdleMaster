@@ -1,6 +1,6 @@
 const SCRIPT_TEXT = document.currentScript ? document.currentScript.textContent : '';
 // ============================================================ constants
-const W = 180, H = 160, OUT = '#1b1b2f';           // logical pixels (portrait); everything is drawn at this size
+const W = 180, H = 128, OUT = '#1b1b2f';           // logical pixels (portrait); everything is drawn at this size
 const SAVE = 'shanhai-beasts-';                       // localStorage key prefix — unique per game
 const FONT = '"Fusion Pixel","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif';
 const rand = (a, b) => a + Math.random() * (b - a);

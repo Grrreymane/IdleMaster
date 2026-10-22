@@ -74,47 +74,48 @@ function renderTabs() {
   setHTML(elTabs, TABS.map(t => {
     const open = t.open(), isNew = open && !SEEN[t.id];
     const dot = open && ((t.id === 'beast' && canEvolve(S)) || (t.id === 'gear' && cheapestUpgrade()) || (t.id === 'nir' && canNirvana(S)));
-    return `<button data-act="tab" data-v="${t.id}" class="${TAB === t.id ? 'on' : ''}${open ? '' : ' lock'}">${open ? img(t.ic()) : '<span style="height:24px;line-height:24px">？</span>'}<span>${open ? t.n : '？？？'}</span>${isNew ? '<span class="new">新</span>' : dot ? '<span class="dot"></span>' : ''}</button>`;
+    return `<button data-act="tab" data-v="${t.id}" class="${TAB === t.id ? 'on' : ''}${open ? '' : ' lock'}">${open ? img(t.ic()) : '<span style="height:20px;line-height:20px">？</span>'}<span>${open ? t.n : '？？？'}</span>${isNew ? '<span class="new">新</span>' : dot ? '<span class="dot"></span>' : ''}</button>`;
   }).join(''));
 }
 // ------------------------------------------------------------ panes
 function paneBeast() {
   const f = FORMS[S.form], D = DER, ev = evoNeed(S);
-  let h = `<div class="card"><h3>${img(formIcon(S.form), 'b')}<span style="font-size:24px;line-height:24px">${f.n}</span><span class="dim">第 ${S.stage} 阶</span></h3>
-<div class="dim">「${QUOTE[S.form] || ''}」</div><div class="good">${f.td}</div></div>`;
-  h += `<div class="card"><div class="row"><span class="grow">攻击 <b class="gold">${fmt(D.atk)}</b></span><span class="grow">生命 <b class="gold">${fmt(D.hp)}</b></span></div>
-<div class="row"><span class="grow">攻速 ${pct(D.spd)}</span><span class="grow">暴击 ${pct(D.crit)} ×${(1 + D.critD).toFixed(1)}</span></div>
-<div class="row"><span class="grow">对大妖 +${pct(D.boss)}</span><span class="grow">精元 +${pct(D.xp - 1)} 灵玉 +${pct(D.gold - 1)}</span></div>
-<div class="dim" style="margin-top:3px">战力来源：等级 ×${fmt(D.parts.lv)} · 进化 ×${fmt(D.parts.evo)} · 装备 ×${fmt(Math.sqrt(D.parts.gearA * D.parts.gearH))} · 图鉴 ×${fmt(D.parts.MM)}${D.parts.nir > 1 ? ' · 涅槃 ×' + D.parts.nir.toFixed(2) : ''}</div></div>`;
+  let h = `<div class="card"><div class="row" style="margin-bottom:2px">${img(formIcon(S.form), 'b')}<span class="gold" style="font-size:16px">${f.n}</span><span class="dim">第 ${S.stage} 阶</span><span class="grow nm good" style="text-align:right">${f.td}</span></div>
+<div class="stats"><span>攻击 <b class="gold">${fmt(D.atk)}</b></span><span>生命 <b class="gold">${fmt(D.hp)}</b></span><span>攻速 ${pct(D.spd)}</span>
+<span>暴击 ${pct(D.crit)}</span><span>暴伤 ×${(1 + D.critD).toFixed(1)}</span><span>对大妖 +${pct(D.boss)}</span>
+<span>精元 +${pct(D.xp - 1)}</span><span>灵玉 +${pct(D.gold - 1)}</span></div>
+<div class="dim nm">战力：等级 ×${fmt(D.parts.lv)} · 进化 ×${fmt(D.parts.evo)} · 装备 ×${fmt(Math.sqrt(D.parts.gearA * D.parts.gearH))} · 图鉴 ×${fmt(D.parts.MM)}${D.parts.nir > 1 ? ' · 涅槃 ×' + D.parts.nir.toFixed(2) : ''}</div></div>`;
   if (ev) {
-    const nx = f.next, ok = canEvolve(S), chk = (b, t) => `<div>${b ? '<span class="good">○</span>' : '<span class="bad">×</span>'} ${t}</div>`;
-    const mz = matZone(S, ev);
-    h += `<div class="card"><h3>进化 · 第 ${S.stage + 1} 阶${nx.length > 1 ? '<span class="dim">（' + nx.length + ' 选 1）</span>' : ''}</h3>
-<div class="row" style="gap:4px;margin-bottom:4px">${nx.map(id => `<img class="ic${S.forms[id] ? '' : ' sil'}" style="width:${nx.length > 2 ? 60 : 84}px;height:auto" src="${formIcon(id, !S.forms[id])}">`).join('')}</div>
-${chk(S.lv >= ev.lv, `等级 ${S.lv}/${ev.lv}`)}${ev.boss >= 0 ? chk(!!S.bossWins[ev.boss], `${ZONES[ev.boss].boss}精血（打倒${ZONES[ev.boss].boss}）`) : ''}${chk(mz >= 0, `${ZONES[ev.z].mat} ${fmt(S.mats[ev.z])}/${ev.mat}${ev.z < S.maxZone ? '<span class="dim">（后面区的材料也行）</span>' : ''}`)}
-<div style="margin-top:6px;text-align:center"><button class="btn ${ok ? 'g glow' : 'off'}" data-k="evo" data-act="evo" ${ok ? '' : 'disabled'}>进化 · 战力 ×${BAL.evoMul}</button></div></div>`;
-  } else h += `<div class="card"><h3>已是上古神兽</h3><div class="dim">打倒夔后可以涅槃，从幼崽再修一世。</div></div>`;
-  return h;
+    const id = f.next[0], ok = canEvolve(S), mz = matZone(S, ev);
+    const chk = (b, t) => `<span>${b ? '<span class="good">○</span>' : '<span class="bad">×</span>'} ${t}</span>`;
+    h += `<div class="card"><div class="row"><img class="ic${S.forms[id] ? '' : ' sil'}" style="width:52px;height:46px;object-fit:contain" src="${formIcon(id, !S.forms[id])}">
+<div class="grow"><div class="gold">进化 · 第 ${S.stage + 1} 阶</div>
+<div class="chk">${chk(S.lv >= ev.lv, `等级 ${S.lv}/${ev.lv}`)}${ev.boss >= 0 ? chk(!!S.bossWins[ev.boss], `${ZONES[ev.boss].boss}精血`) : ''}${chk(mz >= 0, `${ZONES[ev.z].mat} ${fmt(S.mats[ev.z])}/${ev.mat}`)}</div>
+${ev.z < S.maxZone ? '<div class="dim">后面区的材料也行</div>' : ''}</div>
+<button class="btn ${ok ? 'g glow' : 'off'}" data-k="evo" data-act="evo" ${ok ? '' : 'disabled'}>进化<br>战力×${BAL.evoMul}</button></div></div>`;
+  } else h += `<div class="card"><span class="gold">已是上古神兽</span><span class="dim"> · 打倒夔后可以涅槃，从幼崽再修一世</span></div>`;
+  return h + `<div class="dim" style="text-align:center;margin-top:2px">「${QUOTE[S.form] || ''}」</div>`;
 }
 function slotGain(sl) {   // power change of the next level, for the row label
   const s = S.slots[sl]; s.l++; const p = derive(S).power; s.l--; return p / DER.power - 1;
 }
 function paneGear() {
   const cap = slotCap(S), nb = Object.keys(S.bossWins).length;
-  let h = `<div class="card"><div class="row"><span class="grow">强化上限 <b class="gold">Lv${cap}</b>${nb < 8 ? `<span class="dim">（打倒${ZONES[Math.min(7, nb)].boss} +10）</span>` : ''}</span><button class="btn g" data-k="allup" data-act="allup">一键强化</button></div></div><div class="card">`;
+  let h = `<div class="row" style="margin:0 0 4px 2px"><span class="grow">强化上限 <b class="gold">Lv${cap}</b>${nb < 8 ? `<span class="dim">（打倒${ZONES[Math.min(7, nb)].boss} +10）</span>` : ''}</span><button class="btn g s" data-k="allup" data-act="allup">一键强化</button></div><div class="card">`;
   for (const sl of SLOTS) {
     const s = S.slots[sl.id];
-    if (s.r < 0) { h += `<div class="slot"><div class="frame">${img(slotIcon(sl.id, -1), 'b')}</div><div class="grow dim">${sl.n} · 未获得<br>打怪掉落</div></div>`; continue; }
+    if (s.r < 0) { h += `<div class="slot"><div class="frame">${img(slotIcon(sl.id, -1), 'b')}</div><div class="grow dim">${sl.n} · 未获得 · 打怪掉落</div></div>`; continue; }
     const c = slotCost(sl.id, s.l), mz = matZone(S, c), full = s.l >= cap, ok = !full && S.gold >= c.gold && mz >= 0;
     const v = slotVal(sl.id, s.r, s.l), side = sl.k === 'spd' ? `攻速 ${pct(v.spd)} 暴击 ${pct(v.crit)}` : sl.k === 'gain' ? `精元灵玉 +${pct(v.xp)}` : sl.k === 'crit' ? `暴伤 +${pct(v.critD)} 大妖 +${pct(v.boss)}` : sl.k === 'atk' ? '攻击' : '生命';
-    h += `<div class="slot"><div class="frame" style="border-color:${RAR[s.r].c}">${img(slotIcon(sl.id, s.r), 'b')}</div><div class="grow" style="min-width:0"><div class="nm"><span class="r${s.r}">${ITEMS[sl.id][s.r]}</span> <span class="chip r${s.r}">${RAR_N[s.r]}</span> Lv${s.l}</div>
-<div class="dim nm">${side} · 下一级 战力 +${pct(slotGain(sl.id))}</div><div class="nm">${full ? '<span class="dim">已到上限</span>' : `${img(miscIcon('gold'))}<span class="${S.gold >= c.gold ? '' : 'bad'}">${fmt(c.gold)}</span> ${img(matIcon(c.z))}<span class="${mz >= 0 ? '' : 'bad'}">${c.mat}</span>`}</div></div>
+    h += `<div class="slot"><div class="frame" style="border-color:${RAR[s.r].c}">${img(slotIcon(sl.id, s.r), 'b')}</div><div class="grow">
+<div class="row"><span class="nm grow"><span class="r${s.r}">${ITEMS[sl.id][s.r]}</span> <span class="chip r${s.r}">${RAR_N[s.r]}</span> Lv${s.l}</span>${full ? '<span class="dim">已到上限</span>' : `<span class="res">${img(miscIcon('gold'))}<span class="${S.gold >= c.gold ? '' : 'bad'}">${fmt(c.gold)}</span></span><span class="res">${img(matIcon(c.z))}<span class="${mz >= 0 ? '' : 'bad'}">${c.mat}</span></span>`}</div>
+<div class="dim nm">${side} · 下一级 战力 +${pct(slotGain(sl.id))}</div></div>
 <button class="btn s ${ok ? '' : 'off'}" data-act="up" data-v="${sl.id}" ${ok ? '' : 'disabled'}>强化</button></div>`;
   }
   return h + '</div>';
 }
 function paneMap() {
-  let h = `<div class="row" style="margin-bottom:6px"><span class="grow dim">打赢自动去下一档，打输退一档</span><button class="btn s ${S.auto ? 'g' : 'off'}" data-act="auto">自动推进 ${S.auto ? '开' : '关'}</button></div>`;
+  let h = `<div class="row" style="margin:0 0 4px 2px"><span class="grow dim">打赢自动去下一档，打输退一档</span><button class="btn s ${S.auto ? 'g' : 'off'}" data-act="auto">自动推进 ${S.auto ? '开' : '关'}</button></div>`;
   for (let z = 0; z <= Math.min(7, S.maxZone + 1); z++) {
     const Z = ZONES[z], open = z <= S.maxZone, cur = z === S.zone;
     if (!open) { h += `<div class="zone"><span class="grow dim">？？？ · 打倒${ZONES[z - 1].boss}后开放</span></div>`; break; }
@@ -128,7 +129,7 @@ function paneMap() {
         h += `<button class="tier${on ? ' on' : ''}${lock ? ' lock' : ''}${t === 4 ? ' boss' : ''}" data-k="${t === 4 ? 'boss' + z : 'tier' + t}" data-act="tier" data-v="${t}" ${lock ? 'disabled' : ''}>${lock ? '？？？<br>' + (t === 4 ? '凶档杀' + BAL.bossUnlockKills : '杀' + BAL.unlockKills + '只') : `${name}<br><span class="dim">${t === 4 ? (S.bossWins[z] ? '再战' : '胜算' + Math.round(bossOdds(z) * 100) + '%') : TIER_N[t] + ' ' + fmt(kills)}</span>`}</button>`;
       }
       h += '</div>';
-      if (u[4]) h += `<div class="card" style="margin-top:-4px"><span class="gold">${Z.boss}</span>：${Z.rule}<span class="dim"> · 限时 ${BAL.bossTime} 秒，输了不掉东西</span></div>`;
+      if (u[4]) h += `<div class="card" style="margin-top:-2px"><span class="gold">${Z.boss}</span>：${Z.rule}<span class="dim"> · 限时 ${BAL.bossTime} 秒，输了不掉东西</span></div>`;
     }
   }
   return h;
