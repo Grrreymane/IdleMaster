@@ -29,40 +29,92 @@ function pixCanvas(im) {   // an image as a sprite canvas: centred on the QW box
   c.gy = h - (QH - GY); c.ox = Math.round((w - im.width) / 2); c.oy = c.gy + 1 - im.height;
   x.drawImage(im, c.ox, c.oy); return c;
 }
-// where gear goes on each drawn sprite, in the image's own pixels (measured on tools/anchors.py sheets)
-// head: top of the skull (gear horns), brow: forehead, neck: under the jaw, back: saddle centre [x, y, width],
-// paw: front paw on the ground, tail: tail tip, orb: where the spirit orb floats, horns: the form has its own horns, s: gear scale
+// where gear goes on each drawn sprite, in the image's own pixels (read off tools/anchors.py sheets)
+// crown: middle of the forehead, collar: nape -> throat, saddle: [x0, x1, top, hem] (top: under the wing), leg: front-leg cuff [x, y, leg angle],
+// tail: just before the tail tip, hip: the haunch (rune), orb: where the spirit orb floats, s: gear scale
 const ANCH = {
-  f0: { head: [38, 3], brow: [40, 10], neck: [38, 29], back: [20, 28, 10], paw: [36, 43], tail: [2, 30], orb: [52, -4], s: .55 },
-  f1: { head: [44, 2], brow: [46, 8], neck: [44, 27], back: [24, 30, 10], paw: [51, 38], tail: [2, 24], orb: [56, -4], s: .6 },
-  f2: { head: [48, 2], brow: [50, 9], neck: [47, 30], back: [26, 32, 12], paw: [49, 56], tail: [2, 35], orb: [62, -6], s: .65, horns: 1 },
-  f3: { head: [62, 6], brow: [62, 12], neck: [58, 38], back: [34, 40, 14], paw: [60, 71], tail: [2, 48], orb: [78, -4], s: .78, horns: 1 },
-  f4: { head: [76, 22], brow: [78, 30], neck: [70, 52], back: [48, 50, 14], paw: [73, 80], tail: [8, 55], orb: [88, 8], s: .85, horns: 1 },
-  f5: { head: [88, 26], brow: [90, 38], neck: [82, 66], back: [55, 58, 18], paw: [100, 87], tail: [4, 55], orb: [106, 6], s: .95, horns: 1 },
-  f6: { head: [108, 40], brow: [110, 47], neck: [98, 80], back: [62, 72, 22], paw: [124, 104], tail: [14, 78], orb: [128, 20], s: 1.05, horns: 1 },
+  f0: { crown: [36, 8], collar: [22, 25, 38, 32], saddle: [10, 25, 21, 31], leg: [38, 38, 90], tail: [5, 28], hip: [15, 32], orb: [52, -4], s: .55 },
+  f1: { crown: [44, 6], collar: [31, 22, 45, 29], saddle: [13, 30, 23, 34], leg: [46, 37, 20], tail: [4, 27], hip: [18, 36], orb: [56, -4], s: .6 },
+  f2: { crown: [49, 8], collar: [36, 25, 52, 32], saddle: [15, 34, 26, 38], leg: [51, 50, 90], tail: [3, 34], hip: [19, 42], orb: [62, -6], s: .65 },
+  f3: { crown: [63, 12], collar: [47, 28, 66, 40], saddle: [18, 46, 32, 47], leg: [65, 61, 90], tail: [5, 45], hip: [25, 48], orb: [78, -4], s: .78 },
+  f4: { crown: [76, 28], collar: [61, 42, 78, 54], saddle: [32, 62, 44, 60], leg: [69, 69, 90], tail: [8, 54], hip: [30, 62], orb: [88, 8], s: .85 },
+  f5: { crown: [86, 34], collar: [65, 48, 84, 64], saddle: [26, 62, 44, 62], leg: [93, 76, 60], tail: [6, 53], hip: [32, 62], orb: [106, 6], s: .95 },
+  f6: { crown: [108, 46], collar: [84, 64, 104, 82], saddle: [38, 80, 62, 82], leg: [116, 95, 70], tail: [16, 80], hip: [40, 85], orb: [128, 20], s: 1.05 },
 };
-function plateG(G, r, x, y, w, S) {   // armour on a sprite: a domed scale pauldron on the shoulder (rows of overlapping scales)
-  const P = ramp(RAR[r].c), rx = w / 2, ry = w * .42;
-  for (let j = -ry; j <= ry * .35; j++) for (let i = -rx; i <= rx; i++) {
-    const nx = i / rx, ny = j / ry; if (nx * nx + ny * ny > 1) continue;
-    const row = Math.floor((j + ry) / S(2.6)), u = (i + (row & 1) * S(1.6)) / S(3.2), fu = u - Math.floor(u), fv = ((j + ry) / S(2.6)) % 1;
-    const rim = fv > .72 || fu < .12;   // dark gap under each scale
-    const v = lam(nx, ny, Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny))) + (1 - fv) * .12 - (rim ? .3 : 0);
-    G.set(R(x + i), R(y + j), qv(P, v, R(x + i), R(y + j)));
-  }
-  if (r >= 3) blob(G, x, y - ry * .35, S(1.6), S(1.6), ramp(r >= 5 ? '#fff0a0' : '#ffffff'));
+// gear reads as metal + a gem: the metal climbs bone -> bronze -> silver -> gold, the gem carries the rarity colour
+const METAL = ['#8a7c66', '#b07a3c', '#a8b2c2', '#c4ccd8', '#e8b030', '#ffc444'];
+const GEM = ['#a8a090', '#5ac85a', '#4a98ff', '#b06cff', '#ff9a2a', '#f03a3a'];
+function insideMask(cv) {   // the sprite's own area shrunk by a pixel (compositing only, so file:// pages work too)
+  const m = mk(cv.width, cv.height), x = m.getContext('2d');
+  x.drawImage(cv, 0, 0); x.globalCompositeOperation = 'destination-in';
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) x.drawImage(cv, dx, dy);
+  return m;
 }
-function pixGear(cv, id, gear) {   // paint the worn gear over a drawn sprite (own outline pass, so the art keeps its edges)
+function clipped(G, mask) { const c = G.canvas(), x = c.getContext('2d'); x.globalCompositeOperation = 'destination-in'; x.drawImage(mask, 0, 0); return c; }
+function saddleG(G, r, x0, x1, top, hem, S) {   // barding over the back and flank: cloth (fish scales on the big forms), metal edging, studs along a curved hem
+  const cx = (x0 + x1) / 2, hw = (x1 - x0) / 2, P = ramp(mixHex(GEM[r], '#2a2034', .45)), M = ramp(METAL[r]), tr = Math.max(1.5, S(1.8)), tt = Math.max(1, S(1.1));
+  const scales = S(1) >= .8, sh = S(3), sw = S(4.2);
+  const bot = x => hem - Math.pow((x - cx) / hw, 2) * (hem - top) * .55, tp = x => top - (1 - Math.pow((x - cx) / hw, 2)) * S(2.5);   // the top arches over the back
+  for (let y = Math.floor(top - S(2.5)); y <= hem + 1; y++) for (let x = Math.floor(x0); x <= x1; x++) {
+    const nx = (x + .5 - cx) / hw, b = bot(x + .5), t = tp(x + .5); if (Math.abs(nx) > 1 || y + .5 > b || y + .5 < t) continue;
+    if (y + .5 > b - tr) { G.set(x, y, qv(M, .85 - (y + .5 - b + tr) / tr * .5, x, y)); continue; }
+    if (y + .5 < t + tt) { G.set(x, y, qv(M, .9, x, y)); continue; }
+    let v = .72 - (y - t) / (b - t) * .35 - Math.abs(nx) * .2;
+    if (scales) { const row = Math.floor((y - t) / sh), u = (x + (row & 1) * sw / 2) / sw, fu = u - Math.floor(u) - .5, fv = (y - t) / sh - row; v += (1 - fv) * .1 - (fu * fu * 4 + fv * fv > .8 ? .24 : 0); }
+    G.set(x, y, qv(P, v, x, y));
+  }
+  const n = Math.max(2, Math.round(hw / Math.max(3, S(5))));
+  for (let k = 0; k <= n; k++) { const sx = x0 + 2 + (hw * 2 - 4) * k / n; blob(G, sx, bot(sx) - tr / 2, Math.max(.8, S(1)), Math.max(.8, S(1)), ramp(r >= 2 ? GEM[r] : '#d8c8a0')); }
+}
+function neckbandG(G, T, r, nx, ny, tx, ty, S) {   // band round the neck (G, cut to the body) and a pendant under the throat (T)
+  const M = ramp(METAL[r]), w = Math.max(1, S(1.5));
+  tube(G, [nx, ny], [nx + (tx - nx) * .35, ty + S(1)], [tx, ty], w, w, M);
+  const py = ty + w + Math.max(1, S(1.2)), gr = Math.max(1.2, S(1.4 + r * .2));
+  T.set(R(tx - .5), R(ty + w), M[4]);
+  blob(T, tx - .5, py + gr, gr, gr * 1.15, ramp(GEM[r]));
+  if (r >= 4) T.set(R(tx - .5 - gr * .35), R(py + gr * .6), '#ffffff');
+}
+function crownG(G, T, r, x, y, S) {   // circlet across the forehead (G) with a crest and gem on the front (T)
+  const M = ramp(METAL[r]), w = Math.max(.8, S(1.1));
+  tube(G, [x - S(9), y + S(2.5)], [x, y - S(1.5)], [x + S(8), y + S(2.5)], w, w, M);
+  if (r >= 2) { const h = S(3 + r * .7); poly(T, [[x - S(3), y + S(.5)], [x - S(2.2), y - h], [x - S(.6), y - h * .45], [x, y - h * 1.2], [x + S(.6), y - h * .45], [x + S(2.2), y - h], [x + S(3), y + S(.5)]], M); }
+  const gr = Math.max(1, S(1.3 + r * .12));
+  blob(T, x, y, gr, gr, ramp(GEM[r]));
+}
+function cuffG(G, r, x, y, ang, S) {   // bracer round the front leg (cut to the leg, so it takes the leg's width) with an inlaid gem
+  const M = ramp(METAL[r]), a = ang * Math.PI / 180, ux = Math.cos(a), uy = Math.sin(a), half = Math.max(1.5, S(2.4)), len = S(9);
+  for (let j = -len; j <= len; j++) for (let i = -len; i <= len; i++) {
+    const px = Math.floor(x + i), py = Math.floor(y + j), dx = px + .5 - x, dy = py + .5 - y, al = dx * ux + dy * uy, ac = -dx * uy + dy * ux;
+    if (Math.abs(al) > half || Math.abs(ac) > len) continue;
+    G.set(px, py, qv(M, .85 - (al / half + 1) * .28 - Math.abs(ac / len) * .25, px, py));
+  }
+  if (r >= 1) blob(G, x, y, Math.max(.8, S(1.1)), Math.max(.8, S(1.1)), ramp(GEM[r]));
+}
+function charmG(G, T, r, x, y, S) {   // ring round the tail (G) and a charm hanging from it (T)
+  const M = ramp(METAL[r]), rr = Math.max(1.5, S(2.2)), gr = Math.max(1.2, S(1.4 + r * .18));
+  blob(G, x, y, rr, rr, M);
+  for (let k = 1; k <= Math.max(2, S(2.6)); k++) T.set(R(x), R(y + rr * .6 + k), M[3]);
+  blob(T, x + .5, y + rr * .6 + Math.max(2, S(2.6)) + gr, gr, gr * 1.2, ramp(GEM[r]));
+}
+function runeMark(G, r, x, y, S) {   // a glowing sigil on the haunch: claw strokes, more of them on the rare ones (cut to the body, no outline)
+  const c = mixHex(GEM[r], '#ffffff', .35), d = mixHex(GEM[r], '#1a1020', .2), n = r >= 3 ? 3 : 2, L = Math.max(3, S(5)), gap = Math.max(2, S(2.4));
+  for (let k = 0; k < n; k++) {
+    const sx = x + (k - (n - 1) / 2) * gap;
+    for (let t = 0; t <= L; t++) { const px = Math.floor(sx + L * .35 - t * .7), py = Math.floor(y - L / 2 + t); G.set(px, py, t === 0 || t === L ? d : c); if (r >= 4 && t > 0 && t < L) G.set(px + 1, py, d); }
+  }
+}
+function pixGear(cv, id, gear) {   // paint the worn gear over a drawn sprite: wrapped pieces are cut to the body, hanging ones get their own outline
   const a = ANCH[id]; if (!a) return;
-  const G = new Grid(cv.width, cv.height), S = v => v * a.s, P = p => [cv.ox + p[0], cv.oy + p[1]];
-  if (gear.tail !== undefined) tailG(G, gear.tail, ...P(a.tail), S);
-  if (gear.armor !== undefined) plateG(G, gear.armor, ...P(a.back), S(a.back[2]), S);
-  if (gear.collar !== undefined) collarG(G, gear.collar, ...P(a.neck), S);
-  if (gear.claw !== undefined) clawG(G, gear.claw, ...P(a.paw), S);
-  if (gear.horn !== undefined) { if (a.horns) circletG(G, gear.horn, ...P(a.brow), S); else hornG(G, 'gear', RAR[gear.horn].c, ...P(a.head), S, gear.horn); }
-  if (gear.rune !== undefined) runeG(G, gear.rune, ...P(a.brow), S);
-  G.selOutline();
-  cv.getContext('2d').drawImage(G.canvas(), 0, 0);
+  const mask = insideMask(cv), S = v => v * a.s, ox = cv.ox, oy = cv.oy, P = p => [ox + p[0], oy + p[1]];
+  const Gr = new Grid(cv.width, cv.height), G = new Grid(cv.width, cv.height), T = new Grid(cv.width, cv.height), x = cv.getContext('2d');
+  if (gear.rune !== undefined) runeMark(Gr, gear.rune, ...P(a.hip), S);
+  if (gear.armor !== undefined) { const [x0, x1, top, hem] = a.saddle; saddleG(G, gear.armor, ox + x0, ox + x1, oy + top, oy + hem, S); }
+  if (gear.collar !== undefined) { const c = a.collar; neckbandG(G, T, gear.collar, ox + c[0], oy + c[1], ox + c[2], oy + c[3], S); }
+  if (gear.claw !== undefined) cuffG(G, gear.claw, ...P(a.leg), a.leg[2], S);
+  if (gear.tail !== undefined) charmG(G, T, gear.tail, ...P(a.tail), S);
+  if (gear.horn !== undefined) crownG(G, T, gear.horn, ...P(a.crown), S);
+  G.selOutline(); T.selOutline();
+  x.drawImage(clipped(Gr, mask), 0, 0); x.drawImage(clipped(G, mask), 0, 0); x.drawImage(T.canvas(), 0, 0);
 }
 function gearKey(S) { return SLOTS.map(s => S.slots[s.id].r).join(','); }
 function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefined)
