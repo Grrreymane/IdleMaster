@@ -1,0 +1,60 @@
+
+=== active (6 seeds, 200h) ===
+boss clear time per zone (median / min / max), tries, power jump at kill
+  Z0: 6/6 16m [11m..25m] tries 6.5 jump x3.00
+  Z1: 6/6 40m [37m..2.0h] tries 9.7 jump x2.46
+  Z2: 6/6 2.2h [2.1h..2.4h] tries 10.8 jump x2.73
+  Z3: 6/6 4.5h [4.3h..6.2h] tries 24.7 jump x3.01
+  Z4: 6/6 6.6h [6.2h..8.3h] tries 16.3 jump x3.35
+  Z5: 6/6 14.3h [12.3h..14.3h] tries 26.3 jump x3.86
+  Z6: 6/6 24.0h [24.0h..24.2h] tries 15.7 jump x3.79
+  Z7: 6/6 28.0h [26.3h..28.5h] tries 14.2 jump x0.00
+  evolutions: E1 6m x2.50 | E2 17m x2.50 | E3 45m x2.50 | E4 4.7h x2.50 | E5 14.5h x2.50
+  deaths 164  bossFails 116.2
+  first 5 min: 24 improvements, longest gap 40s [10,15,6,20,3,6,1,20,7,9,15,8,8,25,11,40,21,9,15,15,10,4,1,10]
+  final: Lv101 stage6 zone7 power 7.17e+18 M 659/1000000000
+  ln-share of atk: lv 17% evo 14% gear 42% M 25% nir 4%
+  nirvana: run 28.5h souls 34 | run 19.5h souls 35
+   run 1: 14m 40m 2.3h 4.7h 6.6h 14.3h 24.0h 28.5h
+   run 2: 0m 2m 10m 1.7h 3.5h 7.6h 10.1h 19.5h
+   run 3: 0m 1m 6m 42m 2.2h 6.1h 8.6h 12.2h
+
+=== normal (6 seeds, 200h) ===
+boss clear time per zone (median / min / max), tries, power jump at kill
+  Z0: 6/6 2.0h [2.0h..2.0h] tries 5.0 jump x5.27
+  Z1: 6/6 4.0h [4.0h..4.0h] tries 7.2 jump x2.31
+  Z2: 6/6 6.0h [4.2h..6.0h] tries 10.7 jump x2.95
+  Z3: 6/6 8.2h [8.1h..10.0h] tries 10.0 jump x3.12
+  Z4: 6/6 12.1h [12.0h..14.0h] tries 4.7 jump x3.36
+  Z5: 6/6 26.0h [24.0h..26.0h] tries 8.2 jump x4.07
+  Z6: 6/6 32.0h [28.2h..32.0h] tries 10.7 jump x3.42
+  Z7: 6/6 38.0h [36.0h..38.0h] tries 12.2 jump x0.00
+  evolutions: E1 7m x2.50 | E2 2.0h x2.50 | E3 4.1h x2.50 | E4 10.0h x2.50 | E5 28.0h x2.50
+  deaths 67  bossFails 60.5
+  first 5 min: 15 improvements, longest gap 45s [15,15,1,29,3,42,9,36,18,12,45,16,29,5,10]
+  final: Lv99 stage6 zone7 power 1.81e+18 M 649/1000000000
+  ln-share of atk: lv 17% evo 14% gear 40% M 25% nir 4%
+  nirvana: run 36.0h souls 35 | run 24.0h souls 35
+   run 1: 2.0h 4.0h 4.2h 8.2h 12.1h 24.2h 28.2h 36.0h
+   run 2: 0m 2m 9m 2.0h 12.0h 14.0h 18.0h 24.0h
+   run 3: 0m 1m 6m 2.0h 12.0h 12.0h 16.0h 20.2h
+
+=== idle (6 seeds, 200h) ===
+boss clear time per zone (median / min / max), tries, power jump at kill
+  Z0: 6/6 4.0h [4.0h..4.0h] tries 1.2 jump x5.81
+  Z1: 6/6 8.0h [8.0h..8.0h] tries 3.5 jump x2.46
+  Z2: 6/6 12.0h [12.0h..12.0h] tries 7.7 jump x2.77
+  Z3: 6/6 24.0h [24.0h..24.0h] tries 2.5 jump x2.96
+  Z4: 6/6 28.0h [28.0h..28.0h] tries 4.5 jump x3.36
+  Z5: 6/6 36.0h [36.0h..36.0h] tries 5.7 jump x3.85
+  Z6: 6/6 48.0h [48.0h..48.0h] tries 2.7 jump x2.62
+  Z7: 6/6 56.0h [56.0h..56.0h] tries 4.8 jump x0.00
+  evolutions: E1 4.0h x2.50 | E2 4.0h x2.50 | E3 12.0h x2.50 | E4 28.0h x2.50 | E5 48.0h x2.50
+  deaths 18  bossFails 24.5
+  first 5 min: 21 improvements, longest gap 30s [15,15,30,5,21,3,10,5,30,4,11,30,1,6,18,5,15,5,25,28,2]
+  final: Lv96 stage6 zone7 power 1.17e+17 M 599/1000000000
+  ln-share of atk: lv 18% evo 16% gear 38% M 25% nir 4%
+  nirvana: run 56.0h souls 33 | run 40.0h souls 35
+   run 1: 4.0h 8.0h 12.0h 24.0h 28.0h 36.0h 48.0h 56.0h
+   run 2: 0m 2m 4.0h 4.0h 16.0h 16.0h 20.0h 40.0h
+   run 3: 0m 1m 4.0h 4.0h 8.0h 12.0h 24.0h 28.0h
