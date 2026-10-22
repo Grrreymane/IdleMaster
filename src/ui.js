@@ -51,7 +51,10 @@ function guideList() {
   if (cheapestUpgrade()) L.push({ t: '强化装备', go: ['gear', 'allup'], k: 'up' });
   const ev = evoNeed(S);
   if (ev && !canEvolve(S)) {
-    if (ev.boss >= 0 && !S.bossWins[ev.boss]) L.push({ t: `打倒${ZONES[ev.boss].boss}，取精血进化`, go: ['map', 'boss' + ev.boss], k: 'needboss', wait: 1 });
+    if (ev.boss >= 0 && !S.bossWins[ev.boss]) {
+      const cu = S.unlocked[S.zone], key = ev.boss === S.zone ? (cu[4] ? 'boss' + S.zone : 'tier' + cu.lastIndexOf(1)) : ev.boss <= S.maxZone ? 'zone' + ev.boss : (cu[4] ? 'boss' + S.zone : 'tier' + cu.lastIndexOf(1));
+      L.push({ t: `打倒${ZONES[ev.boss].boss}，取精血进化`, go: ['map', key], k: 'needboss', wait: 1 });
+    }
     else if (S.lv < ev.lv) L.push({ t: `自动战斗中，升到 Lv${ev.lv} 可进化`, go: ['beast', 'evo'], k: 'needlv', wait: 1 });
     else L.push({ t: `攒 ${ZONES[ev.z].mat} ${ev.mat} 个可进化`, go: ['beast', 'evo'], k: 'needmat', wait: 1 });
   }
@@ -61,7 +64,7 @@ function guideList() {
 }
 function renderGoal() {
   const L = guideList(), top = L[0];
-  const h = top ? `<span class="t">${top.wait ? '⏳ ' : '▶ '}${top.t}</span><button class="btn s ${top.wait ? 'b' : 'g'}" data-act="go" data-v="${top.go.join(':')}">前往 ›</button><button class="btn s" data-act="guide">变强</button>`
+  const h = top ? `<span class="t">${top.wait ? '⏳ ' : '▶ '}${top.t}</span><button class="btn s ${top.wait ? 'b' : 'g'}" data-act="go" data-v="${top.go.join(':')}">前往</button><button class="btn s" data-act="guide">变强</button>`
     : `<span class="t">⏳ 挂机即可</span><button class="btn s" data-act="guide">变强</button>`;
   setHTML(elGoal, h);
 }
@@ -84,7 +87,7 @@ function paneBeast() {
 <div class="row"><span class="grow">对大妖 +${pct(D.boss)}</span><span class="grow">精元 +${pct(D.xp - 1)} 灵玉 +${pct(D.gold - 1)}</span></div>
 <div class="dim" style="margin-top:3px">战力来源：等级 ×${fmt(D.parts.lv)} · 进化 ×${fmt(D.parts.evo)} · 装备 ×${fmt(Math.sqrt(D.parts.gearA * D.parts.gearH))} · 图鉴 ×${fmt(D.parts.MM)}${D.parts.nir > 1 ? ' · 涅槃 ×' + D.parts.nir.toFixed(2) : ''}</div></div>`;
   if (ev) {
-    const nx = f.next, ok = canEvolve(S), chk = (b, t) => `<div>${b ? '<span class="good">✓</span>' : '<span class="bad">✗</span>'} ${t}</div>`;
+    const nx = f.next, ok = canEvolve(S), chk = (b, t) => `<div>${b ? '<span class="good">○</span>' : '<span class="bad">×</span>'} ${t}</div>`;
     const mz = matZone(S, ev);
     h += `<div class="card"><h3>进化 · 第 ${S.stage + 1} 阶${nx.length > 1 ? '<span class="dim">（' + nx.length + ' 选 1）</span>' : ''}</h3>
 <div class="row" style="gap:4px;margin-bottom:4px">${nx.map(id => `<img class="ic" style="width:${nx.length > 2 ? 60 : 84}px;height:auto" src="${formIcon(id, !S.forms[id])}">`).join('')}</div>
@@ -115,7 +118,7 @@ function paneMap() {
   for (let z = 0; z <= Math.min(7, S.maxZone + 1); z++) {
     const Z = ZONES[z], open = z <= S.maxZone, cur = z === S.zone;
     if (!open) { h += `<div class="zone"><span class="grow dim">？？？ · 打倒${ZONES[z - 1].boss}后开放</span></div>`; break; }
-    h += `<div class="zone${cur ? ' cur' : ''}" data-k="zone${z}" data-act="zone" data-v="${z}"><span class="grow"><b class="gold">${Z.n}</b> <span class="dim">${Z.sub}</span></span>${img(matIcon(z))}<span>${fmt(S.mats[z])}</span>${S.bossWins[z] ? '<span class="good">✓' + Z.boss + '</span>' : ''}</div>`;
+    h += `<div class="zone${cur ? ' cur' : ''}" data-k="zone${z}" data-act="zone" data-v="${z}"><span class="grow"><b class="gold">${Z.n}</b> <span class="dim">${Z.sub}</span></span>${img(matIcon(z))}<span>${fmt(S.mats[z])}</span>${S.bossWins[z] ? '<span class="good">已胜' + Z.boss + '</span>' : ''}</div>`;
     if (cur) {
       const u = S.unlocked[z];
       h += '<div class="tiers">';
@@ -173,7 +176,8 @@ const HAND = { el: null, until: 0 };
 function goTo(tab, key) {
   closeModal(); if (TAB !== tab) setTab(tab);
   renderUI();
-  const el = document.querySelector(`[data-k="${key}"]`);
+  let el = document.querySelector(`[data-k="${key}"]`);
+  if (!el && /^(boss|tier)/.test(key)) { key = 'zone' + (key.startsWith('boss') ? key.slice(4) : S.maxZone); el = document.querySelector(`[data-k="${key}"]`); }   // that zone is folded: point at its header
   if (!el) return;
   try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
   document.querySelectorAll('.glow.guide').forEach(e => e.classList.remove('glow', 'guide'));

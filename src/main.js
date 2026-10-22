@@ -87,7 +87,7 @@ document.addEventListener('click', e => {
   switch (a) {
     case 'tab': SFX.click(); setTab(v); break;
     case 'go': { SFX.click(); const [t, k] = v.split(':'); goTo(t, k); break; }
-    case 'guide': { SFX.click(); const L = guideList(); modal(`<h2>变强指引</h2>${L.length ? L.map(x => `<div class="slot"><span class="grow">${x.wait ? '⏳ ' : '▶ '}${x.t}</span><button class="btn s ${x.wait ? 'b' : 'g'}" data-act="go" data-v="${x.go.join(':')}">前往 ›</button></div>`).join('') : '<div class="dim">⏳ 挂机即可</div>'}<div class="dim" style="margin-top:6px">${pick(TIPS)}</div><div style="text-align:center;margin-top:8px"><button class="btn off s" data-act="close">关闭</button></div>`); break; }
+    case 'guide': { SFX.click(); const L = guideList(); modal(`<h2>变强指引</h2>${L.length ? L.map(x => `<div class="slot"><span class="grow">${x.wait ? '⏳ ' : '▶ '}${x.t}</span><button class="btn s ${x.wait ? 'b' : 'g'}" data-act="go" data-v="${x.go.join(':')}">前往</button></div>`).join('') : '<div class="dim">⏳ 挂机即可</div>'}<div class="dim" style="margin-top:6px">${pick(TIPS)}</div><div style="text-align:center;margin-top:8px"><button class="btn off s" data-act="close">关闭</button></div>`); break; }
     case 'up': if (upgradeSlot(S, v)) { SFX.up(); recalc(); saveGame(); } break;
     case 'allup': allUp(); break;
     case 'evo': chooseEvolve(); break;
@@ -159,7 +159,7 @@ window.addEventListener('pagehide', saveGame);
 function boot() {
   const o = loadGame();
   if (o) { S = o.S; recalc(); const gap = (Date.now() - (o.ts || Date.now())) / 1000; if (gap > 60) offlineReport(gap); }
-  else { S = fresh(); recalc(); }
+  else { S = fresh(); recalc(); setTimeout(() => { toast('你是一只小小的<span class="gold">狌狌</span>'); toast('自动战斗 · 吞噬 · 进化'); }, 600); }
   layout(); renderUI();
 }
 if (location.hash === '#cover') { (document.fonts ? document.fonts.ready : Promise.resolve()).then(renderCover); window.__gameBooted = true; return; }
