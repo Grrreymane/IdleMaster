@@ -15,7 +15,7 @@ setTimeout(() => {
       if (window.MARK && r < 0) { const a = ANCH[id]; x.fillStyle = '#0ff';
         for (const k of ['crown', 'hip', 'tail', 'leg']) x.fillRect(px + (cv.ox + a[k][0]) * Z - 2, y + (a[k][1] + 8) * Z - 2, 5, 5);
         x.fillStyle = '#ff0'; x.fillRect(px + (cv.ox + a.collar[0]) * Z - 2, y + (a.collar[1] + 8) * Z - 2, 5, 5); x.fillRect(px + (cv.ox + a.collar[2]) * Z - 2, y + (a.collar[3] + 8) * Z - 2, 5, 5);
-        x.strokeStyle = '#f0f'; x.strokeRect(px + (cv.ox + a.saddle[0]) * Z, y + (a.saddle[2] + 8) * Z, (a.saddle[1] - a.saddle[0]) * Z, (a.saddle[3] - a.saddle[2]) * Z); }
+        x.fillStyle = '#f0f'; for (let i = 0; i < 6; i += 2) x.fillRect(px + (cv.ox + a.wing[i]) * Z - 2, y + (a.wing[i + 1] + 8) * Z - 2, 5, 5); }
       px += cv.width * Z + 8; rowH = Math.max(rowH, (cv.height - oy + 8) * Z);
     }
     y += rowH + 6;
