@@ -10,9 +10,9 @@ function renderCover() {
   x.fillStyle = '#1a1020'; x.fillRect(0, 168, CW, 12);
   const put = (id, gear, px, py, s, flip) => { const sp = formSprite(id, gear); x.save(); x.translate(px, py); if (flip) { x.scale(-1, 1); } x.drawImage(sp.cv, 0, 0, sp.w * s, sp.h * s); x.restore(); };
   const full = { collar: 5, armor: 4, claw: 5, rune: 5 };
-  put('f6c', { claw: 4, collar: 3 }, 0, 58, 1.05, false);
-  put('f6a', full, 120, 80, .95, false);
-  put('f6e', { collar: 4, rune: 5 }, 322, 86, .9, true);
+  put('f6', { claw: 4, collar: 3 }, 2, 66, 1.1, false);
+  put('f3', full, 128, 84, .95, false);
+  put('f0', { collar: 1 }, 300, 96, .9, true);
   const big = mk(CW * SC, CH * SC), bx = big.getContext('2d'); bx.imageSmoothingEnabled = false; bx.drawImage(c, 0, 0, CW * SC, CH * SC);
   const title = (s, px, y, col) => { bx.font = px + 'px ' + FONT; bx.textAlign = 'center'; const u = px / 12; bx.fillStyle = OUT; for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) bx.fillText(s, 960 + dx * u * 1.5, y + dy * u * 1.5); bx.fillStyle = col; bx.fillText(s, 960, y); };
   title('山海异兽录', 168, 230, '#ffd27a');

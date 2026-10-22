@@ -80,7 +80,7 @@ function renderTabs() {
 // ------------------------------------------------------------ panes
 function paneBeast() {
   const f = FORMS[S.form], D = DER, ev = evoNeed(S);
-  let h = `<div class="card"><h3>${img(formIcon(S.form), 'b')}<span style="font-size:24px;line-height:24px">${f.n}</span><span class="dim">第 ${S.stage} 阶${f.line !== undefined ? ' · ' + LINE_N[f.line] : ''}</span></h3>
+  let h = `<div class="card"><h3>${img(formIcon(S.form), 'b')}<span style="font-size:24px;line-height:24px">${f.n}</span><span class="dim">第 ${S.stage} 阶</span></h3>
 <div class="dim">「${QUOTE[S.form] || ''}」</div><div class="good">${f.td}</div></div>`;
   h += `<div class="card"><div class="row"><span class="grow">攻击 <b class="gold">${fmt(D.atk)}</b></span><span class="grow">生命 <b class="gold">${fmt(D.hp)}</b></span></div>
 <div class="row"><span class="grow">攻速 ${pct(D.spd)}</span><span class="grow">暴击 ${pct(D.crit)} ×${(1 + D.critD).toFixed(1)}</span></div>
@@ -93,7 +93,7 @@ function paneBeast() {
 <div class="row" style="gap:4px;margin-bottom:4px">${nx.map(id => `<img class="ic" style="width:${nx.length > 2 ? 60 : 84}px;height:auto" src="${formIcon(id, !S.forms[id])}">`).join('')}</div>
 ${chk(S.lv >= ev.lv, `等级 ${S.lv}/${ev.lv}`)}${ev.boss >= 0 ? chk(!!S.bossWins[ev.boss], `${ZONES[ev.boss].boss}精血（打倒${ZONES[ev.boss].boss}）`) : ''}${chk(mz >= 0, `${ZONES[ev.z].mat} ${fmt(S.mats[ev.z])}/${ev.mat}${ev.z < S.maxZone ? '<span class="dim">（后面区的材料也行）</span>' : ''}`)}
 <div style="margin-top:6px;text-align:center"><button class="btn ${ok ? 'g glow' : 'off'}" data-k="evo" data-act="evo" ${ok ? '' : 'disabled'}>进化 · 战力 ×${BAL.evoMul}</button></div></div>`;
-  } else h += `<div class="card"><h3>已是上古神兽</h3><div class="dim">打倒夔后可以涅槃，换一条线再修一世。</div></div>`;
+  } else h += `<div class="card"><h3>已是上古神兽</h3><div class="dim">打倒夔后可以涅槃，从幼崽再修一世。</div></div>`;
   return h;
 }
 function slotGain(sl) {   // power change of the next level, for the row label
@@ -138,7 +138,7 @@ function paneBook() {
   let h = `<div class="card"><h3>${img(miscIcon('m'))}山海图鉴 ${D.M}</h3><div class="bar m"><i style="width:${clamp(D.Me / Math.max(D.M, D.cap === 1e9 ? D.M : D.cap) * 100, 0, 100)}%"></i><b>生效 ${D.Me}${D.cap < 1e9 ? ' / 上限 ' + D.cap : ''}</b></div>
 <div style="margin-top:3px">攻击、生命 <b class="gold">×${fmt(D.MM)}</b>${D.cap < 1e9 ? `<span class="dim"> · 打倒${ZONES[Math.min(7, nb)].boss}，上限放开到 ${BAL.mCap[nb + 1] >= 1e9 ? '无限' : BAL.mCap[nb + 1]}</span>` : ''}</div>
 <div class="dim">每种怪杀 10/50/200/800/3000 只、每件装备、每个形态、每只大妖都加点</div></div>`;
-  h += `<div class="card"><h3>形态 ${Object.keys(S.forms).length}/${Object.keys(FORMS).length}</h3><div class="grid" style="grid-template-columns:repeat(5,1fr)">`;
+  h += `<div class="card"><h3>形态 ${Object.keys(S.forms).length}/${Object.keys(FORMS).length}</h3><div class="grid" style="grid-template-columns:repeat(4,1fr)">`;
   for (const id in FORMS) { const own = S.forms[id]; h += `<div style="text-align:center"><img style="width:100%;image-rendering:pixelated" src="${formIcon(id, !own)}"><div class="${own ? '' : 'dim'}">${own ? FORMS[id].n : '？？？'}</div></div>`; }
   h += '</div></div><div class="card"><h3>装备 ' + Object.keys(S.items).length + '/42</h3><div class="grid">';
   for (let r = 0; r < 6; r++) for (const sl of SLOTS) { const own = S.items[sl.id + ':' + r]; h += `<div class="frame" style="border-color:${own ? RAR[r].c : '#000'}">${img(slotIcon(sl.id, own ? r : -1), 'b')}</div>`; }

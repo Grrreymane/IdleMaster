@@ -1,33 +1,35 @@
 // ------------------------------------------------------------ the player's forms: look parameters (see quadGrid / snakeGrid)
 const LOOK = {
-  f0: { body: '#8a7058', belly: '#d8c8b0', ears: 'round', ear: '#f4f0e8', earIn: '#e8c8c0', snout: 'short', tail: 'thin', tailTip: '#8a7058', leg: .75, size: .78, eye: '#2a1a14', pupil: 'round', eyeR: 2.7, cheek: 1 },
-  f1: { body: '#c8a050', belly: '#f0e0b8', ears: 'cat', snout: 'short', mane: '#9a6a30', tail: 'fox', tailTip: '#5a4028', leg: .82, size: .86, eye: '#4a3018', pupil: 'round', eyeR: 2.6 },
-  f2: { body: '#d8b048', belly: '#f4e4b8', spots: '#3a2818', ears: 'fox', snout: 'mid', horn: 'ox', hornCol: '#e8dcc0', tail: 'thin', tailTip: '#3a2818', size: .94, eye: '#c8402a' },
-  f3a: { body: '#e0602a', belly: '#fff0dc', tail: 'fox', tailTip: '#ffd040', ears: 'fox', ear: '#c84a20', snout: 'long', eye: '#ffd23a' },
-  f4a: { body: '#e88a3a', belly: '#fff4e0', tail: 'fox', tailTip: '#fff4e0', ears: 'fox', snout: 'long', wings: '#f8f0e0', eye: '#ffd23a', size: 1.02 },
-  f5a: { body: '#e8c040', belly: '#fff4c8', tail: 'fox', tails: 3, tailTip: '#fff8e0', ears: 'fox', snout: 'long', horn: 'curl', hornCol: '#fff0c0', eye: '#ff8a3a', size: 1.06 },
-  f6a: { body: '#f4ecd8', belly: '#ffffff', tail: 'fox', tails: 9, tailCol: '#f8e8c8', tailTip: '#ff8a3a', ears: 'fox', earIn: '#ff9ab0', snout: 'long', eye: '#ff6a8a', size: 1.1 },
-  f3b: { body: '#e0a038', belly: '#fff0d0', stripes: '#2a1a10', tail: 'lion', tailTip: '#3a2818', ears: 'cat', snout: 'short', thick: 1, fangs: 1, eye: '#9cff5a' },
-  f4b: { body: '#c84028', belly: '#f0c0a0', spots: '#5a1a10', horn: 'single', hornCol: '#f0e8d0', tail: 'thin', tails: 5, tailTip: '#5a1a10', ears: 'cat', snout: 'short', thick: 1, fangs: 1, eye: '#ffe040', size: 1.04 },
-  f5b: { body: '#3a5a9a', belly: '#a8c0e0', stripes: '#18203a', tail: 'thin', tailTip: '#18203a', ears: 'cat', snout: 'short', thick: 1, fangs: 1, eye: '#ffd040', size: 1.08 },
-  f6b: { body: '#e8e4dc', belly: '#ffffff', stripes: '#4a4a5a', wings: '#2a2438', mane: '#a8a0b0', tail: 'lion', tailTip: '#2a2438', ears: 'cat', snout: 'short', thick: 1, fangs: 1, eye: '#ff4a3a', size: 1.12 },
-  f3c: { snake: 1, body: '#4a9a8a', belly: '#d8f0c0', legs: 6, wings: 'small4', wingCol: '#8ad0f0', size: .82, eye: '#ffde3a' },
-  f4c: { snake: 1, body: '#7a9ac8', belly: '#e0e8f8', wings: 'thin4', wingCol: '#c8e0ff', crest: '#a0c0f0', size: .92, eye: '#ff8a3a' },
-  f5c: { snake: 1, body: '#2a5aa0', belly: '#e8d890', legs: 4, whisk: '#e8f0ff', crest: '#4a8ad0', fangs: 1, fin: '#4a8ad0', size: 1, eye: '#ffde3a' },
-  f6c: { snake: 1, body: '#2a9a8a', belly: '#f0e090', legs: 4, wings: 'big', wingCol: '#f0d870', horn: 'antler', hornCol: '#f8f0d0', whisk: '#ffffff', mane: '#f0e0a0', fangs: 1, size: 1.1, eye: '#ffde3a' },
-  f6d: { snake: 1, body: '#c03028', belly: '#f0a060', face: 'human', skin: '#f4c8a0', mane: '#3a1a18', candle: 1, size: 1.12, thick: 1.1, eye: '#ffde3a' },
-  f3e: { body: '#a0683a', belly: '#e8c8a0', headCol: '#f4f0e8', stripes: '#3a2010', tail: 'lion', tailCol: '#d03a2a', tailTip: '#e04a3a', hoof: '#3a2a20', ears: 'fox', snout: 'long', mane: '#f4f0e8', eye: '#3a2010', pupil: 'round', leg: 1.08 },
-  f4e: { body: '#f0ece4', belly: '#ffffff', horn: 'antler', hornCol: '#d8c8a8', hoof: '#8a7a6a', ears: 'long', snout: 'mid', tail: 'stub', tailTip: '#ffffff', eye: '#3a6ac0', pupil: 'round', leg: 1.12, size: 1.04 },
-  f5e: { body: '#e8a040', belly: '#fff0d0', stripes: ['#3a6ac0', '#c03a3a', '#3a9a48', '#2a1a10', '#f0f0f0'], tail: 'thin', tailLen: 1.6, tailTip: '#c03a3a', ears: 'cat', snout: 'short', mane: '#d04a3a', thick: 1, eye: '#ffe040', size: 1.08 },
-  f6e: { body: '#f4f0e8', belly: '#ffffff', horn: 'twin', hornCol: '#a8c8f0', mane: '#dfe8ff', beard: '#ffffff', tail: 'lion', tailTip: '#c8d8f0', ears: 'long', snout: 'mid', eye: '#5ac8ff', thick: 1, size: 1.12 },
+  f0: { body: '#4a4452', belly: '#a89cb0', stripes: '#e0502a', ears: 'round', snout: 'short', tail: 'thin', tailTip: '#2a2430', leg: .62, size: .74, eye: '#ffc840', pupil: 'round', eyeR: 2.9, cheek: 1 },
+  f1: { body: '#4a4452', belly: '#a89cb0', stripes: '#e0502a', ears: 'cat', snout: 'short', mane: '#c8c0d0', tail: 'thin', tailTip: '#2a2430', leg: .8, size: .84, eye: '#ffc840' },
+  f2: { body: '#423c4a', belly: '#9a90a4', stripes: '#e8582a', ears: 'cat', snout: 'short', mane: '#d8d0e0', tail: 'lion', tailTip: '#2a2430', thick: 1, fangs: 1, size: .92, eye: '#ffc840' },
+  f3: { body: '#3c3644', belly: '#948aa0', stripes: '#f0602a', ears: 'cat', snout: 'short', mane: '#d8d0e0', wings: '#2a2430', tail: 'lion', tailTip: '#2a2430', thick: 1, fangs: 1, size: .98, eye: '#ffd040' },
+  f4: { body: '#36303e', belly: '#8a8096', stripes: '#ff6a2a', ears: 'cat', snout: 'short', mane: '#e0d8e8', wings: '#2a2430', tail: 'lion', tailTip: '#2a2430', thick: 1, fangs: 1, size: 1.04, eye: '#ffd040' },
+  f5: { body: '#302a38', belly: '#80768c', stripes: '#ff7a30', ears: 'cat', snout: 'short', mane: '#e8e0f0', wings: '#24202c', tail: 'lion', tailTip: '#24202c', thick: 1, fangs: 1, size: 1.1, eye: '#ffe060' },
+  f6: { body: '#2a2432', belly: '#786e84', stripes: '#ff8a3a', ears: 'cat', snout: 'short', mane: '#f4eefc', wings: '#1e1a26', horn: 'twin', hornCol: '#e8e0d0', tail: 'lion', tailTip: '#ff8a3a', thick: 1, fangs: 1, size: 1.14, eye: '#ffe060' },
 };
 // sprite for a form wearing gear: cached by form + rarities
 const FSPR = new Map();
+// hand-finished sprites (AI draft -> tools/pixelize.py -> img/<key>.png) replace the procedural ones once loaded
+const ART_FILES = [];
+const PIX = {};
+function loadPix() {
+  for (const k of ART_FILES) {
+    const im = new Image();
+    im.onload = () => { PIX[k] = im; FSPR.clear(); for (const e in ESPR) delete ESPR[e]; for (const i in ICONS) if (i.startsWith('form')) delete ICONS[i]; };
+    im.src = 'img/' + k + '.png';
+  }
+}
+function pixCanvas(im) {   // an image as a sprite canvas: centred on the QW box, feet on GY
+  const w = Math.max(QW, im.width), c = mk(w, QH), x = c.getContext('2d');
+  x.drawImage(im, Math.round((w - im.width) / 2), GY + 1 - im.height); return c;
+}
 function gearKey(S) { return SLOTS.map(s => S.slots[s.id].r).join(','); }
 function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefined)
   const key = id + '|' + JSON.stringify(gearR || {});
   let c = FSPR.get(key); if (c) return c;
   if (FSPR.size > 40) FSPR.clear();
+  if (PIX[id]) { const cv = pixCanvas(PIX[id]); c = { cv, A: {}, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff') }; FSPR.set(key, c); return c; }
   const f = LOOK[id] || LOOK.f0, g = Object.assign({}, gearR || {}); delete g.orb;
   const out = f.snake ? snakeGrid(f, g) : quadGrid(f, g);
   out.G.selOutline();

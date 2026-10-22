@@ -66,6 +66,8 @@ function fallbackMonster(z, t) {
 }
 function enemySprite(z, t) {
   const k = z + '-' + t; if (ESPR[k]) return ESPR[k];
+  const im = PIX['m' + k];
+  if (im) { const r = mk(im.width, im.height); r.getContext('2d').drawImage(im, 0, 0); const l = flipC(r); return (ESPR[k] = { l, w: l.width, h: l.height, white: tintC(l, '#ffffff'), red: tintC(l, '#ff4a3a', .45), sil: tintC(l, '#2a2038') }); }
   let G = typeof monsterGrid === 'function' ? monsterGrid(z, t) : fallbackMonster(z, t);
   G = cropGrid(G); G.selOutline();
   const r = G.canvas(), l = flipC(r);
@@ -113,7 +115,7 @@ function drawStage(T) {
   const dead = S.dead > 0, img = FX.evo > 1.2 ? spr.white : spr.cv;
   if (dead) g.globalAlpha = .35;
   const cut = GY - 22;   // rows below this are legs: they stay put while the body breathes
-  g.drawImage(img, 0, cut, spr.w, spr.h - cut, bx, by + cut, spr.w, spr.h - cut);
+  g.drawImage(img, bx, by);   // whole body first, so the breathing shift never opens a seam
   g.drawImage(img, 0, 0, spr.w, cut, bx, by - breath, spr.w, cut);
   if (FX.hurt > 0) { g.globalAlpha = .45 * FX.hurt / .2; g.drawImage(spr.white, bx, by - breath); }
   g.globalAlpha = 1;

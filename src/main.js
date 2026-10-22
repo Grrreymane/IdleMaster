@@ -7,7 +7,8 @@ function migrate(s) {   // fill fields added after a save was made (never wipe a
   for (const k in d) if (s[k] === undefined) s[k] = d[k];
   for (const sl of SLOTS) if (!s.slots[sl.id]) s.slots[sl.id] = { r: -1, l: 0 };
   for (const k in d.stats) if (s.stats[k] === undefined) s.stats[k] = d.stats[k];
-  if (!FORMS[s.form]) s.form = 'f0';
+  if (!FORMS[s.form]) s.form = 'f' + Math.min(6, s.stage);   // saves from the 4-line version: keep the stage, move to the Qiongqi line
+  const fm = {}; for (let i = 0; i <= Math.min(6, s.stage); i++) fm['f' + i] = 1; for (const k in s.forms) if (FORMS[k]) fm[k] = 1; s.forms = fm;
   s.f = null; s.dead = 0;
   return s;
 }
@@ -68,12 +69,7 @@ function doEvolve(id) {
 <div class="dim">「${QUOTE[id] || ''}」</div><div class="good">${f.td}</div><div style="margin:6px 0">战力 <b class="gold">×${(DER.power / p0).toFixed(1)}</b></div>
 <button class="btn g" data-act="close">好！</button></div>`);
 }
-function chooseEvolve() {
-  const nx = FORMS[S.form].next;
-  if (nx.length === 1) { doEvolve(nx[0]); return; }
-  modal(`<h2>选一条路</h2><div class="dim" style="text-align:center;margin-bottom:6px">涅槃之后还能换别的路</div><div class="choices">${nx.map(id => `<div class="choice"><img src="${formIcon(id)}"><div class="gold">${FORMS[id].n}${FORMS[id].line !== undefined && nx.length > 2 ? ' · ' + LINE_N[FORMS[id].line] : ''}</div><div class="good" style="min-height:30px">${FORMS[id].td}</div><button class="btn g s" data-act="pick" data-v="${id}">选它</button></div>`).join('')}</div>
-<div style="text-align:center;margin-top:6px"><button class="btn off s" data-act="close">再想想</button></div>`);
-}
+function chooseEvolve() { const nx = FORMS[S.form].next; if (nx.length) doEvolve(nx[0]); }
 function allUp() {
   let n = 0;
   for (let i = 0; i < 500; i++) { const b = cheapestUpgrade(); if (!b || !upgradeSlot(S, b.id, evoReserve())) break; n++; }
@@ -91,7 +87,6 @@ document.addEventListener('click', e => {
     case 'up': if (upgradeSlot(S, v)) { SFX.up(); recalc(); saveGame(); } break;
     case 'allup': allUp(); break;
     case 'evo': chooseEvolve(); break;
-    case 'pick': closeModal(); doEvolve(v); break;
     case 'auto': S.auto = !S.auto; SFX.click(); break;
     case 'zone': if (+v !== S.zone) { setFight(S, +v, 0); SFX.click(); } break;
     case 'tier': { const t = +v; if (t === 4) { bossPre = DER; } if (setFight(S, S.zone, t)) SFX.click(); break; }
@@ -157,6 +152,7 @@ function frame(now) {
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
 window.addEventListener('pagehide', saveGame);
 function boot() {
+  loadPix();
   const o = loadGame();
   if (o) { S = o.S; recalc(); const gap = (Date.now() - (o.ts || Date.now())) / 1000; if (gap > 60) offlineReport(gap); }
   else { S = fresh(); recalc(); setTimeout(() => { toast('你是一只小小的<span class="gold">狌狌</span>'); toast('自动战斗 · 吞噬 · 进化'); }, 600); }

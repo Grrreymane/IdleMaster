@@ -39,27 +39,14 @@ const SLOTS = [
 ];
 const SLOT_I = Object.fromEntries(SLOTS.map((s, i) => [s.id, i]));
 // evolution forms: st = stage, next = what it can become, tr = trait (small passive)
-const FORMS = {
-  f0: { n: '狌狌', st: 0, next: ['f1'], tr: { spd: .05 }, td: '善走：攻速 +5%' },
-  f1: { n: '类', st: 1, next: ['f2'], tr: { lvHeal: 1 }, td: '自为牝牡：升级时回满生命' },
-  f2: { n: '狡', st: 2, next: ['f3a', 'f3b', 'f3c', 'f3e'], tr: { gold: .1 }, td: '见则大穰：灵玉 +10%' },
-  f3a: { n: '青丘狐', line: 0, st: 3, next: ['f4a'], tr: { crit: .03 }, td: '狐火：暴击 +3%' },
-  f4a: { n: '獙獙', line: 0, st: 4, next: ['f5a'], tr: { atkP: .1 }, td: '旱风：攻击 +10%' },
-  f5a: { n: '乘黄', line: 0, st: 5, next: ['f6a'], tr: { regenP: .5 }, td: '长寿：回复 +50%' },
-  f6a: { n: '九尾狐', line: 0, st: 6, next: [], tr: { critD: 1 }, td: '九尾：暴伤 +100%' },
-  f3b: { n: '彘', line: 1, st: 3, next: ['f4b'], tr: { killHeal: .05 }, td: '食人：每杀回 5% 生命' },
-  f4b: { n: '狰', line: 1, st: 4, next: ['f5b'], tr: { crit: .08 }, td: '击石之音：暴击 +8%' },
-  f5b: { n: '罗罗', line: 1, st: 5, next: ['f6b'], tr: { boss: .15 }, td: '虎踞：对大妖 +15%' },
-  f6b: { n: '穷奇', line: 1, st: 6, next: [], tr: { fresh: .3 }, td: '从首始食：打高血量敌人 +30%' },
-  f3c: { n: '肥遗', line: 2, st: 3, next: ['f4c'], tr: { dr: .08 }, td: '鳞厚：受伤 -8%' },
-  f4c: { n: '鸣蛇', line: 2, st: 4, next: ['f5c'], tr: { bossRegen: .005 }, td: '其音如磬：大妖战回复 +0.5%/秒' },
-  f5c: { n: '蛟', line: 2, st: 5, next: ['f6c', 'f6d'], tr: { respawn: .5 }, td: '潜渊：复活快一倍' },
-  f6c: { n: '应龙', line: 2, st: 6, next: [], tr: { flood: 1 }, td: '畜水：每 10 秒洪流一击 ×3' },
-  f6d: { n: '烛龙', line: 2, st: 6, next: [], tr: { atkP: .15, hpP: .15 }, td: '昼夜：攻击、生命 +15%' },
-  f3e: { n: '鹿蜀', line: 3, st: 3, next: ['f4e'], tr: { xp: .1 }, td: '宜子孙：精元 +10%' },
-  f4e: { n: '夫诸', line: 3, st: 4, next: ['f5e'], tr: { regen: .01 }, td: '白鹿：每秒多回 1% 生命' },
-  f5e: { n: '驺吾', line: 3, st: 5, next: ['f6e'], tr: { offline: .2 }, td: '日行千里：离线 +20%' },
-  f6e: { n: '白泽', line: 3, st: 6, next: [], tr: { drop: .25 }, td: '知万物：掉装备 +25%' },
+const FORMS = {   // one family: the Qiongqi line (穷奇), cute cub -> legendary winged tiger
+  f0: { n: '穷奇幼崽', st: 0, next: ['f1'], tr: { spd: .05 }, td: '虎崽好动：攻速 +5%' },
+  f1: { n: '刺毛虎', st: 1, next: ['f2'], tr: { lvHeal: 1 }, td: '猬毛初生：升级时回满生命' },
+  f2: { n: '嗥虎', st: 2, next: ['f3'], tr: { gold: .1 }, td: '音如嗥狗：灵玉 +10%' },
+  f3: { n: '生翼虎', st: 3, next: ['f4'], tr: { crit: .05 }, td: '翼风：暴击 +5%' },
+  f4: { n: '邽山凶虎', st: 4, next: ['f5'], tr: { killHeal: .05 }, td: '是食人：每杀回 5% 生命' },
+  f5: { n: '穷奇', st: 5, next: ['f6'], tr: { boss: .15 }, td: '四凶之一：对大妖 +15%' },
+  f6: { n: '上古穷奇', st: 6, next: [], tr: { fresh: .3, atkP: .1 }, td: '食人从首始：打高血量敌人 +30%，攻击 +10%' },
 };
 // ------------------------------------------------------------ formulas
 const eLv = (z, t) => 10 * z + (t === 4 ? BAL.bossLv : BAL.tierLv[t]);

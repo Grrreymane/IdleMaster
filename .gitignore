@@ -4,3 +4,4 @@ _bot.js
 __pycache__/
 _lab/
 .claude/
+.cache/
