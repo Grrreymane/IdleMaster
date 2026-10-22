@@ -19,6 +19,7 @@ ap.add_argument('--h', type=int, default=96)
 ap.add_argument('--colors', type=int, default=40)
 ap.add_argument('--split', type=int, default=0)
 ap.add_argument('--heights', default='')
+ap.add_argument('--nomerge', action='store_true', help='keep only the N biggest blobs (icons: drop ghost reflections) instead of merging the small ones in')
 ap.add_argument('--maxw', type=int, default=0, help='also shrink so the width stays within N pixels')
 ap.add_argument('--box', type=int, default=0, help='fit the larger side into N pixels (icons) instead of using a height')
 ap.add_argument('--keepgreen', action='store_true', help='the creature itself has green: skip the green-cast cleanup')
@@ -103,6 +104,7 @@ def components(mask, f=4):
 def merge_to(boxes, n):
     boxes = sorted(boxes, key=lambda b: -b[4])
     big, small = boxes[:n], boxes[n:]
+    if a.nomerge: small = []
     for b in small:   # sparks, smoke, flames: join the nearest big blob
         d = lambda B: max(0, max(B[0], b[0]) - min(B[2], b[2])) + max(0, max(B[1], b[1]) - min(B[3], b[3]))
         B = min(big, key=d); B[0] = min(B[0], b[0]); B[1] = min(B[1], b[1]); B[2] = max(B[2], b[2]); B[3] = max(B[3], b[3])
@@ -119,8 +121,8 @@ def merge_to(boxes, n):
 if not a.split:
     finish(0, im.shape[1], a.h, a.dst)
 else:
-    boxes, clean = components(alpha > .5)
-    alpha *= clean   # thin drawn ground lines go too
+    boxes, clean = components(alpha > .97)   # solid pixels only: faint ghost reflections / glows don't count as creatures
+    alpha *= components(alpha > .5)[1]       # thin drawn ground lines go too
     if len(boxes) < a.split:
         raise SystemExit(f'found {len(boxes)} creatures, expected {a.split}')
     hs = [int(v) for v in a.heights.split(',')] if a.heights else [a.h] * a.split
