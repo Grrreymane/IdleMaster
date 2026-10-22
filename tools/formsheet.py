@@ -1,12 +1,13 @@
 # Render every player form (with and without full gear) into _lab/forms_sheet.png for review.
 import pathlib, subprocess, sys, json
 root = pathlib.Path(__file__).resolve().parent.parent
-mods = ['core.js', 'art_base.js', 'art_quad.js', 'art_snake.js', 'rules.js', 'art_forms.js']
+mods = ['core.js', 'art_base.js', 'art_quad.js', 'art_snake.js', 'rules.js', 'content.js', 'art_forms.js']
+src_pre = 'const ESPR = {};' + chr(10)
 src = '\n'.join((root / 'src' / m).read_text(encoding='utf-8') for m in mods)
 gear = sys.argv[1] if len(sys.argv) > 1 else '{}'
 src += r'''
-;(function(){
-const ids = Object.keys(LOOK), SC = 3, cols = 6, gear = %s;
+; loadPix(); setTimeout(function(){
+const ids = Object.keys(LOOK), SC = 3, cols = 4, gear = %s;
 const cv = document.getElementById('c'), cx = cv.getContext('2d');
 cv.width = cols * QW * SC; cv.height = Math.ceil(ids.length / cols) * (QH + 8) * SC;
 cx.imageSmoothingEnabled = false;
@@ -17,7 +18,7 @@ ids.forEach((id, i) => {
   cx.fillStyle = '#fff'; cx.font = '20px sans-serif'; cx.fillText(id + ' ' + FORMS[id].n, x + 6, y + (QH + 6) * SC);
 });
 document.title = 'READY';
-})();
+}, 800);
 ''' % gear
 (root / '_lab' / 'sheet_src.js').write_text(src, encoding='utf-8')
 out = sys.argv[2] if len(sys.argv) > 2 else str(root / '_lab' / 'forms_sheet.png')

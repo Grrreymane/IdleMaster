@@ -106,7 +106,7 @@ function drawStage(T) {
   // the beast
   const D = DER, spr = formSprite(S.form, gearOf(S));
   const breath = Math.sin(T * 2.2) > 0 ? 1 : 0, lunge = FX.lunge > 0 ? Math.round(Math.sin(FX.lunge / .16 * Math.PI) * 4) : 0;
-  const bx = (boss ? -14 : -6) + lunge, by = FLOOR - GY;
+  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge, by = FLOOR - GY;   // wide sprites slide left so the enemy stays clear
   // shadow
   g.globalAlpha = .28; g.fillStyle = '#000'; g.fillRect(bx + 22, FLOOR - 1, 70, 3); g.globalAlpha = 1;
   // rarity aura: motes rising for each ornate (r >= 3) item worn
@@ -122,7 +122,7 @@ function drawStage(T) {
   // floating orb
   const orbR = S.slots.orb.r;
   if (orbR >= 0) {
-    const ox = bx + 102, oy = by + 18 + Math.sin(T * 1.7) * 3, col = ORB_COL[orbR];
+    const op = spr.A.orb || [102, 18], ox = bx + op[0], oy = by + op[1] + Math.sin(T * 1.7) * 3, col = ORB_COL[orbR];
     g.globalAlpha = .25 + .1 * Math.sin(T * 3); disc(ox, oy, 5 + orbR * .4, col); g.globalAlpha = 1;
     disc(ox, oy, 2.5 + orbR * .25, shade(col, -30)); disc(ox - .5, oy - .5, 1.8 + orbR * .2, col); g.fillStyle = '#ffffff'; g.fillRect(Math.round(ox - 1), Math.round(oy - 1), 1, 1);
   }

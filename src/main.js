@@ -158,7 +158,7 @@ function boot() {
   else { S = fresh(); recalc(); setTimeout(() => { toast('你是一只小小的<span class="gold">狌狌</span>'); toast('自动战斗 · 吞噬 · 进化'); }, 600); }
   layout(); renderUI();
 }
-if (location.hash === '#cover') { (document.fonts ? document.fonts.ready : Promise.resolve()).then(renderCover); window.__gameBooted = true; return; }
+if (location.hash === '#cover') { loadPix(); (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(renderCover, 800)); window.__gameBooted = true; return; }
 boot();
 // Test hook (tools/make_test_page.py / headless.js paste code here)
 /*TEST_HOOK*/

@@ -41,9 +41,9 @@ const SLOT_I = Object.fromEntries(SLOTS.map((s, i) => [s.id, i]));
 // evolution forms: st = stage, next = what it can become, tr = trait (small passive)
 const FORMS = {   // one family: the Qiongqi line (穷奇), cute cub -> legendary winged tiger
   f0: { n: '穷奇幼崽', st: 0, next: ['f1'], tr: { spd: .05 }, td: '虎崽好动：攻速 +5%' },
-  f1: { n: '刺毛虎', st: 1, next: ['f2'], tr: { lvHeal: 1 }, td: '猬毛初生：升级时回满生命' },
+  f1: { n: '小翼虎', st: 1, next: ['f2'], tr: { lvHeal: 1 }, td: '振翅：升级时回满生命' },
   f2: { n: '嗥虎', st: 2, next: ['f3'], tr: { gold: .1 }, td: '音如嗥狗：灵玉 +10%' },
-  f3: { n: '生翼虎', st: 3, next: ['f4'], tr: { crit: .05 }, td: '翼风：暴击 +5%' },
+  f3: { n: '赤翼虎', st: 3, next: ['f4'], tr: { crit: .05 }, td: '赤翼：暴击 +5%' },
   f4: { n: '邽山凶虎', st: 4, next: ['f5'], tr: { killHeal: .05 }, td: '是食人：每杀回 5% 生命' },
   f5: { n: '穷奇', st: 5, next: ['f6'], tr: { boss: .15 }, td: '四凶之一：对大妖 +15%' },
   f6: { n: '上古穷奇', st: 6, next: [], tr: { fresh: .3, atkP: .1 }, td: '食人从首始：打高血量敌人 +30%，攻击 +10%' },

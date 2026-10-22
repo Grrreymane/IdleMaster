@@ -11,7 +11,7 @@ const LOOK = {
 // sprite for a form wearing gear: cached by form + rarities
 const FSPR = new Map();
 // hand-finished sprites (AI draft -> tools/pixelize.py -> img/<key>.png) replace the procedural ones once loaded
-const ART_FILES = [];
+const ART_FILES = ['f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6'];
 const PIX = {};
 function loadPix() {
   for (const k of ART_FILES) {
@@ -22,14 +22,55 @@ function loadPix() {
 }
 function pixCanvas(im) {   // an image as a sprite canvas: centred on the QW box, feet on GY
   const w = Math.max(QW, im.width), c = mk(w, QH), x = c.getContext('2d');
-  x.drawImage(im, Math.round((w - im.width) / 2), GY + 1 - im.height); return c;
+  c.ox = Math.round((w - im.width) / 2); c.oy = GY + 1 - im.height;
+  x.drawImage(im, c.ox, c.oy); return c;
+}
+// where gear goes on each drawn sprite, in the image's own pixels (measured on tools/anchors.py sheets)
+// head: top of the skull (gear horns), brow: forehead, neck: under the jaw, back: saddle centre [x, y, width],
+// paw: front paw on the ground, tail: tail tip, orb: where the spirit orb floats, horns: the form has its own horns, s: gear scale
+const ANCH = {
+  f0: { head: [32, 4], brow: [34, 10], neck: [34, 28], back: [17, 25, 10], paw: [38, 38], tail: [2, 26], orb: [46, -4], s: .5 },
+  f1: { head: [38, 3], brow: [40, 8], neck: [38, 26], back: [20, 28, 10], paw: [47, 38], tail: [3, 24], orb: [52, -4], s: .55 },
+  f2: { head: [44, 3], brow: [46, 10], neck: [46, 33], back: [24, 34, 12], paw: [46, 54], tail: [3, 33], orb: [58, -6], s: .62, horns: 1 },
+  f3: { head: [56, 5], brow: [58, 14], neck: [56, 37], back: [34, 36, 14], paw: [60, 64], tail: [2, 42], orb: [70, -4], s: .72, horns: 1 },
+  f4: { head: [70, 18], brow: [72, 28], neck: [66, 50], back: [46, 46, 14], paw: [66, 74], tail: [12, 50], orb: [84, 8], s: .82, horns: 1 },
+  f5: { head: [86, 28], brow: [86, 36], neck: [80, 64], back: [56, 52, 18], paw: [96, 82], tail: [6, 52], orb: [100, 6], s: .9, horns: 1 },
+  f6: { head: [96, 40], brow: [96, 46], neck: [90, 72], back: [62, 66, 20], paw: [110, 92], tail: [12, 70], orb: [118, 18], s: 1, horns: 1 },
+};
+function plateG(G, r, x, y, w, S) {   // armour on a sprite: a domed scale pauldron on the shoulder (rows of overlapping scales)
+  const P = ramp(RAR[r].c), rx = w / 2, ry = w * .42;
+  for (let j = -ry; j <= ry * .35; j++) for (let i = -rx; i <= rx; i++) {
+    const nx = i / rx, ny = j / ry; if (nx * nx + ny * ny > 1) continue;
+    const row = Math.floor((j + ry) / S(2.6)), u = (i + (row & 1) * S(1.6)) / S(3.2), fu = u - Math.floor(u), fv = ((j + ry) / S(2.6)) % 1;
+    const rim = fv > .72 || fu < .12;   // dark gap under each scale
+    const v = lam(nx, ny, Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny))) + (1 - fv) * .12 - (rim ? .3 : 0);
+    G.set(R(x + i), R(y + j), qv(P, v, R(x + i), R(y + j)));
+  }
+  if (r >= 3) blob(G, x, y - ry * .35, S(1.6), S(1.6), ramp(r >= 5 ? '#fff0a0' : '#ffffff'));
+}
+function pixGear(cv, id, gear) {   // paint the worn gear over a drawn sprite (own outline pass, so the art keeps its edges)
+  const a = ANCH[id]; if (!a) return;
+  const G = new Grid(cv.width, cv.height), S = v => v * a.s, P = p => [cv.ox + p[0], cv.oy + p[1]];
+  if (gear.tail !== undefined) tailG(G, gear.tail, ...P(a.tail), S);
+  if (gear.armor !== undefined) plateG(G, gear.armor, ...P(a.back), S(a.back[2]), S);
+  if (gear.collar !== undefined) collarG(G, gear.collar, ...P(a.neck), S);
+  if (gear.claw !== undefined) clawG(G, gear.claw, ...P(a.paw), S);
+  if (gear.horn !== undefined) { if (a.horns) circletG(G, gear.horn, ...P(a.brow), S); else hornG(G, 'gear', RAR[gear.horn].c, ...P(a.head), S, gear.horn); }
+  if (gear.rune !== undefined) runeG(G, gear.rune, ...P(a.brow), S);
+  G.selOutline();
+  cv.getContext('2d').drawImage(G.canvas(), 0, 0);
 }
 function gearKey(S) { return SLOTS.map(s => S.slots[s.id].r).join(','); }
 function formSprite(id, gearR) {   // gearR: { horn: r, ... } (rarity or undefined)
   const key = id + '|' + JSON.stringify(gearR || {});
   let c = FSPR.get(key); if (c) return c;
   if (FSPR.size > 40) FSPR.clear();
-  if (PIX[id]) { const cv = pixCanvas(PIX[id]); c = { cv, A: {}, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff') }; FSPR.set(key, c); return c; }
+  if (PIX[id]) {
+    const cv = pixCanvas(PIX[id]), a = ANCH[id], g = Object.assign({}, gearR || {}); delete g.orb;
+    pixGear(cv, id, g);
+    c = { cv, A: a ? { orb: [cv.ox + a.orb[0], cv.oy + a.orb[1]] } : {}, w: cv.width, h: cv.height, sil: tintC(cv, '#2a2038'), white: tintC(cv, '#ffffff') };
+    FSPR.set(key, c); return c;
+  }
   const f = LOOK[id] || LOOK.f0, g = Object.assign({}, gearR || {}); delete g.orb;
   const out = f.snake ? snakeGrid(f, g) : quadGrid(f, g);
   out.G.selOutline();
