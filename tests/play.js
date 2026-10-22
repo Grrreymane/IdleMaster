@@ -21,6 +21,7 @@
   }
   const f = s => (s / 3600).toFixed(2) + 'h';
   out.unshift(`play ${H}h: bosses ${Object.keys(clear).map(k => k + '@' + f(clear[k])).join(' ')} | evo ${Object.keys(evo).map(k => k + '@' + f(evo[k])).join(' ')} | Lv${S.lv} form ${S.form} M ${DER.M} deaths ${S.stats.deaths} errs ${errs} | ${((performance.now() - t0) / 1000).toFixed(1)}s`);
+  if (window.KEEP) { document.title = 'DONE'; window.RES = out.join(' / '); TAB = 'beast'; renderUI(); return; }
   document.body.innerHTML = '<pre id="res" style="color:#fff;font:14px monospace;white-space:pre-wrap">' + out.join('\n') + '</pre>';
   document.title = 'DONE';
 })();

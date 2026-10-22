@@ -109,6 +109,7 @@ function layout() {
   const vv = window.visualViewport, vw = vv ? vv.width : window.innerWidth, vh = vv ? vv.height : window.innerHeight;
   SCALE = Math.min(vw / 360, vh / 620);
   const app = document.getElementById('app'), h = vh / SCALE;
+  if (!app) return;
   app.style.transform = `scale(${SCALE})`; app.style.height = h + 'px';
   app.style.left = Math.max(0, (vw - 360 * SCALE) / 2) + 'px';
   const dpr = Math.min(3, window.devicePixelRatio || 1);
@@ -144,7 +145,7 @@ function frame(now) {
   try {
     if (real > 2) { const gap = real; if (gap > 60) offlineReport(gap); else advance(gap); }
     else { const dt = clamp(real, 0, .05); T += dt; advance(dt); }
-    updateFX(Math.min(real, .05)); drawStage(T); present(); musicTick(S.f && S.f.t === 4);
+    updateFX(Math.min(real, .5)); drawStage(T); present(); musicTick(S.f && S.f.t === 4);
     uiT -= real; if (uiT <= 0) { uiT = .25; renderUI(); }
     updateHand();
     saveT -= real; if (saveT <= 0) { saveT = 10; saveGame(); }
@@ -161,6 +162,7 @@ function boot() {
   else { S = fresh(); recalc(); }
   layout(); renderUI();
 }
+if (location.hash === '#cover') { (document.fonts ? document.fonts.ready : Promise.resolve()).then(renderCover); window.__gameBooted = true; return; }
 boot();
 // Test hook (tools/make_test_page.py / headless.js paste code here)
 /*TEST_HOOK*/

@@ -26,7 +26,7 @@ const BAL = {
   mileKills: [10, 50, 200, 800, 3000], mileM: [1, 2, 3, 4, 5], mSlot: 2,
   mBoss: 15, mItem: 3, mForm: 12,
   offCap: 12 * 3600, offEff: 1, offMaxRate: 8,
-  nirPct: .06, nirMax: 60,
+  nirPct: .08, nirMax: 60,
 };
 const SLOTS = [
   { id: 'horn', n: '角饰', k: 'atk' },
@@ -125,7 +125,7 @@ function derive(S) {
   const dps = atk / (BAL.pInt / (1 + spd)) * (1 + crit * critD);
   return {
     tr, regen: BAL.regen * (1 + (tr.regenP || 0)) + (tr.regen || 0), bossRegen: BAL.bossRegen * (1 + (tr.regenP || 0)) + (tr.bossRegen || 0),
-    atk, hp, spd, crit, critD, boss: a.boss, xp: 1 + a.xp + (nir - 1), gold: 1 + a.gold + (nir - 1), M, Me, MM, cap: mCap(S),
+    atk, hp, spd, crit, critD, boss: a.boss, xp: 1 + a.xp + (nir - 1), gold: 1 + a.gold + (nir - 1), mat: 1 + (nir - 1) * .2, M, Me, MM, cap: mCap(S),
     dps, power: Math.pow(dps, .6) * Math.pow(hp, .4) * 2, parts: { lv: lvM, evo, gearA: (BAL.A0 + a.atkF) / BAL.A0, gearH: (BAL.H0 + a.hpF) / BAL.H0, MM, nir },
   };
 }
@@ -201,7 +201,7 @@ function bossFail(S, E, why) { const z = S.f.z; S.f = null; S.tier = 3; E('bossF
 function kill(S, E, D) {
   const f = S.f, e = enemyStats(f.z, f.t), sp = SP(f.z, f.t);
   S.kills[sp] = (S.kills[sp] || 0) + 1; S.stats.kills++;
-  const xp = e.xp * D.xp, gd = e.gold * D.gold, mat = f.t === 4 ? 30 : 1;
+  const xp = e.xp * D.xp, gd = e.gold * D.gold, m0 = (f.t === 4 ? 30 : 1) * D.mat, mat = Math.floor(m0) + (rnd() < m0 % 1 ? 1 : 0);
   S.xp += xp; S.gold += gd; S.mats[f.z] += mat;
   if (D.tr.killHeal) S.hp = Math.min(D.hp, S.hp + D.hp * D.tr.killHeal);
   S.f = null;
@@ -284,9 +284,9 @@ function offlineGain(S, secs) {
   if (!n) return { secs, n: 0 };
   const sp = SP(z, t); S.kills[sp] = (S.kills[sp] || 0) + n;
   const xp = e.xp * D.xp * n, gd = e.gold * D.gold * n;
-  const lv0 = S.lv; S.xp += xp; S.gold += gd; S.mats[z] += n; levelUp(S, () => {}, D);
+  const lv0 = S.lv, mats = Math.floor(n * D.mat); S.xp += xp; S.gold += gd; S.mats[z] += mats; levelUp(S, () => {}, D);
   let items = 0; const drops = Math.floor(n * BAL.dropRate * .5);
   for (let i = 0; i < drops; i++) { S.pity++; if (rnd() < .5) { dropItem(S, (ty) => { if (ty === 'item') items++; }, z, -1); } }
-  return { secs, n, xp, gold: gd, mat: n, z, lv: S.lv - lv0, items };
+  return { secs, n, xp, gold: gd, mat: mats, z, lv: S.lv - lv0, items };
 }
 // ==== RULES END ====

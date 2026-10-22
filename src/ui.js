@@ -52,8 +52,8 @@ function guideList() {
   const ev = evoNeed(S);
   if (ev && !canEvolve(S)) {
     if (ev.boss >= 0 && !S.bossWins[ev.boss]) L.push({ t: `打倒${ZONES[ev.boss].boss}，取精血进化`, go: ['map', 'boss' + ev.boss], k: 'needboss', wait: 1 });
-    else if (S.lv < ev.lv) L.push({ t: `升到 Lv${ev.lv} 可进化`, go: ['map', 'zone' + S.zone], k: 'needlv', wait: 1 });
-    else L.push({ t: `攒 ${ZONES[ev.z].mat} ${ev.mat} 个可进化`, go: ['map', 'zone' + S.zone], k: 'needmat', wait: 1 });
+    else if (S.lv < ev.lv) L.push({ t: `自动战斗中，升到 Lv${ev.lv} 可进化`, go: ['beast', 'evo'], k: 'needlv', wait: 1 });
+    else L.push({ t: `攒 ${ZONES[ev.z].mat} ${ev.mat} 个可进化`, go: ['beast', 'evo'], k: 'needmat', wait: 1 });
   }
   if (u && !u[4]) { const t = u.lastIndexOf(1); L.push({ t: t < 3 ? `打 ${TIER_N[t]}档 ${BAL.unlockKills} 只，开下一档` : `打 凶档 ${BAL.bossUnlockKills} 只，引出大妖`, go: ['map', 'tier' + t], k: 'tier', wait: 1 }); }
   else if (u && u[4] && !S.bossWins[z]) L.push({ t: `攒材料强化，再战${ZONES[z].boss}（胜算 ${Math.round(bossOdds(z) * 100)}%）`, go: ['gear', 'allup'], k: 'farm', wait: 1 });
@@ -88,7 +88,7 @@ function paneBeast() {
     const mz = matZone(S, ev);
     h += `<div class="card"><h3>进化 · 第 ${S.stage + 1} 阶${nx.length > 1 ? '<span class="dim">（' + nx.length + ' 选 1）</span>' : ''}</h3>
 <div class="row" style="gap:4px;margin-bottom:4px">${nx.map(id => `<img class="ic" style="width:${nx.length > 2 ? 60 : 84}px;height:auto" src="${formIcon(id, !S.forms[id])}">`).join('')}</div>
-${chk(S.lv >= ev.lv, `等级 ${S.lv}/${ev.lv}`)}${ev.boss >= 0 ? chk(!!S.bossWins[ev.boss], `${ZONES[ev.boss].boss}精血（打倒${ZONES[ev.boss].boss}）`) : ''}${chk(mz >= 0, `${ZONES[ev.z].mat} ${fmt(S.mats[ev.z])}/${ev.mat}${ev.z < 7 ? '<span class="dim">（后面区的材料也行）</span>' : ''}`)}
+${chk(S.lv >= ev.lv, `等级 ${S.lv}/${ev.lv}`)}${ev.boss >= 0 ? chk(!!S.bossWins[ev.boss], `${ZONES[ev.boss].boss}精血（打倒${ZONES[ev.boss].boss}）`) : ''}${chk(mz >= 0, `${ZONES[ev.z].mat} ${fmt(S.mats[ev.z])}/${ev.mat}${ev.z < S.maxZone ? '<span class="dim">（后面区的材料也行）</span>' : ''}`)}
 <div style="margin-top:6px;text-align:center"><button class="btn ${ok ? 'g glow' : 'off'}" data-k="evo" data-act="evo" ${ok ? '' : 'disabled'}>进化 · 战力 ×${BAL.evoMul}</button></div></div>`;
   } else h += `<div class="card"><h3>已是上古神兽</h3><div class="dim">打倒夔后可以涅槃，换一条线再修一世。</div></div>`;
   return h;
@@ -151,7 +151,7 @@ function paneNir() {
   const can = canNirvana(S), gain = nirvanaSouls(S);
   return `<div class="card"><h3>${img(miscIcon('fire'))}涅槃</h3><div>浴火重生：回到南山从头修，带走<b class="gold">精魄</b>。</div>
 <div class="dim">保留：图鉴、形态、装备品质。重置：等级、强化、进度。</div>
-<div style="margin-top:4px">每点精魄：攻击、生命、精元、灵玉 +${BAL.nirPct * 100}%（最多 ${BAL.nirMax} 点）</div>
+<div style="margin-top:4px">每点精魄：攻击、生命、精元、灵玉 +${Math.round(BAL.nirPct * 100)}%，材料 +${(BAL.nirPct * 20).toFixed(1)}%（最多 ${BAL.nirMax} 点）</div>
 <div>现有精魄 <b class="gold">${S.souls}</b>${can ? ` · 这次涅槃 +${Math.min(gain, BAL.nirMax - S.souls)}` : ''}</div>
 <div style="text-align:center;margin-top:6px"><button class="btn r ${can ? 'glow' : 'off'}" data-k="nir" data-act="nir" ${can ? '' : 'disabled'}>${can ? '涅槃重生' : '打倒夔后开放'}</button></div></div>`;
 }

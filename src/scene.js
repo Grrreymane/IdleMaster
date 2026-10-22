@@ -179,7 +179,7 @@ function present() {
   ctx.globalAlpha = 1;
 }
 const TXC = new Map();
-function txtPx(size) { const px = size * K, n = Math.max(1, Math.round(px / 12)); return n * 12; }
+function txtPx(size) { const px = size * K; let n = Math.max(1, Math.round(px / 12)); if (n > 1 && n * 12 > px * 1.2) n--; return n * 12; }   // whole multiples of the 12px pixel font, never more than 20% bigger
 function textSprite(t) {
   const px = txtPx(t.size), key = t.s + '|' + px + '|' + t.col + '|' + t.stroke;
   let c = TXC.get(key); if (c) return c;
