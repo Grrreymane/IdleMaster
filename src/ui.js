@@ -143,10 +143,15 @@ function paneBook() {
   for (const id in FORMS) { const own = S.forms[id]; h += `<div style="text-align:center"><img style="width:100%;image-rendering:pixelated" src="${formIcon(id, !own)}"${own ? '' : ' class="sil"'}><div class="${own ? '' : 'dim'}">${own ? FORMS[id].n : '？？？'}</div></div>`; }
   h += '</div></div><div class="card"><h3>装备 ' + Object.keys(S.items).length + '/42</h3><div class="grid">';
   for (let r = 0; r < 6; r++) for (const sl of SLOTS) { const own = S.items[sl.id + ':' + r]; h += `<div class="frame" style="border-color:${own ? RAR[r].c : '#000'}">${img(slotIcon(sl.id, PIX['i-' + sl.id + '-' + r] ? r : own ? r : -1), own ? 'b' : 'b sil')}</div>`; }
-  h += '</div></div><div class="card"><h3>妖兽</h3>';
+  const seen = Object.keys(S.kills).filter(k => S.kills[k] > 0).length;
+  h += `</div></div><div class="card"><h3>妖兽 ${seen}/${ZONES.length * 5}</h3>`;
   for (let z = 0; z <= S.maxZone; z++) {
-    h += `<div class="row" style="flex-wrap:wrap;gap:2px 8px"><span class="gold">${ZONES[z].n}</span>`;
-    for (let t = 0; t < 5; t++) { const k = S.kills[z + '-' + t] || 0, st = BAL.mileKills.filter(c => k >= c).length; h += `<span class="${k ? '' : 'dim'}">${k ? (t === 4 ? ZONES[z].boss : ZONES[z].mons[t]) : '？？'}${k ? '<span class="gold">' + '★'.repeat(st) + '</span>' : ''}</span>`; }
+    const Z = ZONES[z];
+    h += `<div class="row"><span class="gold">${Z.n}</span><span class="dim">${Z.sub}</span><span class="grow"></span>${S.bossWins[z] ? `<span class="good">已胜${Z.boss}</span>` : ''}</div><div class="mons">`;
+    for (let t = 0; t < 5; t++) {
+      const k = S.kills[z + '-' + t] || 0, st = BAL.mileKills.filter(c => k >= c).length;
+      h += `<div class="mon${t === 4 ? ' boss' : ''}"><img src="${monIcon(z, t)}"${k ? '' : ' class="sil"'}><div class="nm${k ? '' : ' dim'}">${k ? (t === 4 ? Z.boss : Z.mons[t]) : '？？'}</div><div class="stars">${'★'.repeat(st) || '&nbsp;'}</div></div>`;
+    }
     h += '</div>';
   }
   return h + '</div>';

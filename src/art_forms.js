@@ -175,6 +175,10 @@ const MISC_ROWS = {
 function miscIcon(k) { return iconURL('m' + k, () => rows(MISC_ROWS[k][0], MISC_ROWS[k][1])); }
 const MAT_COL = ['#7ac860', '#d0603a', '#a8c8e8', '#f0a8b8', '#c89a48', '#ff8a6a', '#8ad0b0', '#ffd040'];
 function matIcon(z) { return iconURL('mat' + z, () => rows(['..XX..', '.XYYX.', 'XYYYYX', 'XYYYXX', '.XXXX.'], { X: shade(MAT_COL[z], -60), Y: MAT_COL[z] })); }
+function monIcon(z, t) {   // codex picture of a monster: the drawn one, or the code-drawn fallback (facing left, as in a fight)
+  if (PIX['m' + z + '-' + t]) return 'img/m' + z + '-' + t + '.png';
+  return iconURL('mon' + z + '-' + t, () => enemySprite(z, t).l);
+}
 function formIcon(id, sil) {   // portrait thumbnail for the codex / evolution choice (drawn forms: the picture itself, CSS .sil darkens it)
   if (PIX[id]) return 'img/' + id + '.png';
   return iconURL('form' + id + (sil ? 's' : ''), () => { const s = formSprite(id, {}); return sil ? s.sil : s.cv; });
