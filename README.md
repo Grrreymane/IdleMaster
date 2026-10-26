@@ -20,6 +20,7 @@
 - 源码在 `src/`，`python tools/sync.py` 写回单文件 `index.html`（别手改生成区）。`sh tools/dev.sh` = sync + 生成 `_test.html` + 语法检查。
 - 数值：`docs/NUMBERS.md`；模拟器 `node tools/sim.js --seeds 6 --hours 200 --nir 2`（直接跑 index.html 里的规则段）。
 - 浏览器试玩脚本：`_test.html#window.PLAY_H=40;fetch('tests/play.js').then(r=>r.text()).then(t=>eval(t))`。
+- 上架物料在 `1gp-kit/`（封面、截图、15 秒宣传片）：封面 `index.html#cover1600`，截图 `tests/storeshots.js`，宣传片 `tools/trailer.js`（`record_video.py`）。
 - 美术（立绘、怪物、背景、装备图标）是 AI 起稿再缩成像素图，流程见 `docs/art-prompts.md`。
 - 改了文字跑 `python D:/Minigame/_workflow/tools/subset_font.py .`（字体是本地子集，全用像素字）。
 - 设计决定见 `docs/DECISIONS.md`，进度见 `docs/PROGRESS.md`。

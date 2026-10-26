@@ -1,0 +1,16 @@
+{
+  "title": "山海异兽录",
+  "titleEn": "Beasts of Shanhai",
+  "description": "养一只翼虎幼崽，挂机打怪、穿装备，一路进化成上古穷奇。\n它会自己战斗：打怪攒精元、灵玉和材料，在「装备」里一键强化，在「异兽」里进化。\n七个部位的装备直接画在它身上；七阶进化，从奶凶幼崽长成火鬃巨翼的上古凶兽。\n八片山海、三十二种《山海经》异兽和八只大妖，每只大妖一条特殊规则；离线也在修炼，打倒夔后可以涅槃再修一世。",
+  "descriptionEn": "Raise a winged tiger cub and evolve it into the ancient beast Qiongqi.\nIt battles by itself: earn essence, jade and materials, upgrade gear with one tap and evolve when you're ready.\nSeven pieces of gear show right on its body, and seven forms take it from a fluffy cub to a fire-maned legend.\nEight lands from the Classic of Mountains and Seas, 32 creatures and 8 great demons, each with its own rule. It keeps training while you're away, and after the last demon you can be reborn for another run.",
+  "genre": "idle",
+  "tags": ["像素风", "山海经", "进化", "老虎", "单手玩"],
+  "tagsEn": ["Pixel art", "Chinese mythology", "Evolution", "Tiger", "One-handed"],
+  "tools": ["Claude Code"],
+  "orientation": "portrait",
+  "session": "long",
+  "notes": "这个游戏在 2026-10-22 开始做，git 里一共 15 次提交（这次上架前）。\n\n技术上是原生 JavaScript + canvas，没有用框架；代码分在 src/ 的十几个模块里，用脚本拼回单个 index.html，玩家那边不需要构建。数值先在无头模拟器里跑：一个 Node 脚本按游戏里的真实规则从开局挂到通关，对照数值文档调平衡。\n\n美术换过两轮：最早全部用代码画（球体光照加抖动上色的程序化异兽），后来改成 AI 起稿、再用脚本缩成像素图。主角只留穷奇一条进化线，定下的原则是始终是老虎、翅膀长在肩胛，七个形态从幼崽长到上古穷奇；眼睛在 Pixelorama 里手工精修过。\n\n装备直接画在立绘上：颈圈、头环、护腕、尾饰和翼甲都裁进立绘的轮廓里，所以会跟着身形走。音乐和音效用 WebAudio 实时合成，字体是 Fusion Pixel 的本地子集。",
+  "cover": "cover.png",
+  "screenshots": ["shots/01-gear.png", "shots/02-evolve.png", "shots/03-boss.png", "shots/04-codex.png", "shots/05-cub.png"],
+  "preview": "preview.mp4"
+}
