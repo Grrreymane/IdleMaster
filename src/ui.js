@@ -1,6 +1,6 @@
 // ============================================================ DOM interface: HUD, goal line, tabs, panes, modals, guide hand
 const $ = id => document.getElementById(id);
-const elHud = $('hud'), elGoal = $('goal'), elPane = $('pane'), elTabs = $('tabs'), elModal = $('modal'), elMbox = $('mbox'), elHand = $('hand'), elToast = $('toast'), elOver = $('over');
+const elHud = $('hud'), elGoal = $('goal'), elPane = $('pane'), elTabs = $('tabs'), elModal = $('modal'), elMbox = $('mbox'), elHand = $('hand'), elToast = $('toast'), elOver = $('over'), elSkills = $('skills');
 let TAB = 'beast';
 const TABS = [
   { id: 'beast', n: '异兽', ic: () => miscIcon('beast'), open: () => true },
@@ -25,7 +25,7 @@ function bossOdds(z) {
   const saved = rnd; let wins = 0, seed = 7;
   setRnd(() => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; });
   for (let n = 0; n < 6; n++) {
-    const C = JSON.parse(JSON.stringify(S)); C.dead = 0; C.hp = DER.hp; spawn(C, z, 4);
+    const C = JSON.parse(JSON.stringify(S)); C.dead = 0; C.hp = DER.hp; C.roar = 0; C.burst = null; spawn(C, z, 4);
     let won = false; const E = (ty) => { if (ty === 'bossWin') won = true; };
     for (let i = 0; i < (BAL.bossTime + 1) * 10 && C.f && C.f.t === 4 && !(C.dead > 0); i++) step(C, .1, E, DER);
     if (won) wins++;
@@ -58,7 +58,7 @@ function guideList() {
     else if (S.lv < ev.lv) L.push({ t: `自动战斗中，升到 Lv${ev.lv} 可进化`, go: ['beast', 'evo'], k: 'needlv', wait: 1 });
     else L.push({ t: `攒 ${ZONES[ev.z].mat} ${ev.mat} 个可进化`, go: ['beast', 'evo'], k: 'needmat', wait: 1 });
   }
-  if (u && !u[4]) { const t = u.lastIndexOf(1); L.push({ t: t < 3 ? `打 ${TIER_N[t]}档 ${BAL.unlockKills} 只，开下一档` : `打 凶档 ${BAL.bossUnlockKills} 只，引出大妖`, go: ['map', 'tier' + t], k: 'tier', wait: 1 }); }
+  if (u && !u[4]) { const t = u.lastIndexOf(1), k = S.kills[z + '-' + t] || 0; L.push({ t: t < 3 ? `打 ${TIER_N[t]}档 ${k}/${BAL.unlockKills} 只，开下一档` : `打 凶档 ${k}/${BAL.bossUnlockKills} 只，引出大妖`, go: ['map', 'tier' + t], k: 'tier', wait: 1 }); }
   else if (u && u[4] && !S.bossWins[z]) L.push({ t: `攒材料强化，再战${ZONES[z].boss}（胜算 ${Math.round(bossOdds(z) * 100)}%）`, go: ['gear', 'allup'], k: 'farm', wait: 1 });
   return L;
 }
@@ -84,6 +84,7 @@ function paneBeast() {
 <div class="stats"><span>攻击 <b class="gold">${fmt(D.atk)}</b></span><span>生命 <b class="gold">${fmt(D.hp)}</b></span><span>攻速 ${pct(D.spd)}</span>
 <span>暴击 ${pct(D.crit)}</span><span>暴伤 ×${(1 + D.critD).toFixed(1)}</span><span>对大妖 +${pct(D.boss)}</span>
 <span>精元 +${pct(D.xp - 1)}</span><span>灵玉 +${pct(D.gold - 1)}</span></div>
+${BAL.skills.some((k, i) => skillOpen(S, i)) ? `<div>技能：${BAL.skills.filter((k, i) => skillOpen(S, i)).map(k => `<span class="gold">${k.n}</span> ${k.d}`).join(' · ')}</div>` : ''}
 <div class="dim nm">战力：等级 ×${fmt(D.parts.lv)} · 进化 ×${fmt(D.parts.evo)} · 装备 ×${fmt(Math.sqrt(D.parts.gearA * D.parts.gearH))} · 图鉴 ×${fmt(D.parts.MM)}${D.parts.nir > 1 ? ' · 涅槃 ×' + D.parts.nir.toFixed(2) : ''}</div></div>`;
   if (ev) {
     const id = f.next[0], ok = canEvolve(S), mz = matZone(S, ev);
@@ -115,7 +116,7 @@ function paneGear() {
   return h + '</div>';
 }
 function paneMap() {
-  let h = `<div class="row" style="margin:0 0 4px 2px"><span class="grow dim">打赢自动去下一档，打输退一档</span><button class="btn s ${S.auto ? 'g' : 'off'}" data-act="auto">自动推进 ${S.auto ? '开' : '关'}</button></div>`;
+  let h = `<div class="row" style="margin:0 0 4px 2px"><span class="grow dim">四档轮着打，越凶材料越多</span><button class="btn s ${S.auto ? 'g' : 'off'}" data-act="auto">自动巡山 ${S.auto ? '开' : '关'}</button></div>`;
   for (let z = 0; z <= Math.min(7, S.maxZone + 1); z++) {
     const Z = ZONES[z], open = z <= S.maxZone, cur = z === S.zone;
     if (!open) { h += `<div class="zone"><span class="grow dim">？？？ · 打倒${ZONES[z - 1].boss}后开放</span></div>`; break; }
@@ -124,12 +125,12 @@ function paneMap() {
       const u = S.unlocked[z];
       h += '<div class="tiers">';
       for (let t = 0; t < 5; t++) {
-        const on = S.tier === t && S.zone === z, lock = !u[t], kills = S.kills[z + '-' + t] || 0;
+        const on = S.zone === z && (S.auto ? t < 4 && t <= topTier(S) : S.tier === t), lock = !u[t], kills = S.kills[z + '-' + t] || 0;
         const name = t === 4 ? Z.boss : Z.mons[t];
         h += `<button class="tier${on ? ' on' : ''}${lock ? ' lock' : ''}${t === 4 ? ' boss' : ''}" data-k="${t === 4 ? 'boss' + z : 'tier' + t}" data-act="tier" data-v="${t}" ${lock ? 'disabled' : ''}>${lock ? '？？？<br>' + (t === 4 ? '凶档杀' + BAL.bossUnlockKills : '杀' + BAL.unlockKills + '只') : `${name}<br><span class="dim">${t === 4 ? (S.bossWins[z] ? '再战' : '胜算' + Math.round(bossOdds(z) * 100) + '%') : TIER_N[t] + ' ' + fmt(kills)}</span>`}</button>`;
       }
       h += '</div>';
-      if (u[4]) h += `<div class="card" style="margin-top:-2px"><span class="gold">${Z.boss}</span>：${Z.rule}<span class="dim"> · 限时 ${BAL.bossTime} 秒，输了不掉东西</span></div>`;
+      if (u[4]) h += `<div class="card" style="margin-top:-2px"><span class="gold">${Z.boss}</span>：${Z.rule}；<span class="good">${Z.ans}</span><span class="dim"> · 限时 ${BAL.bossTime} 秒，输了不掉东西</span></div>`;
     }
   }
   return h;
@@ -166,7 +167,21 @@ function paneNir() {
 }
 const PANES = { beast: paneBeast, gear: paneGear, map: paneMap, book: paneBook, nir: paneNir };
 function renderPane() { setHTML(elPane, PANES[TAB]()); }
-function renderUI() { renderHud(); renderGoal(); renderTabs(); renderPane(); renderOver(); }
+function renderUI() { renderSkills(); renderHud(); renderGoal(); renderTabs(); renderPane(); renderOver(); }
+// the skill row under the stage: appears with the first skill; later ones show which form brings them
+function renderSkills() {
+  const any = BAL.skills.some((k, i) => skillOpen(S, i));
+  elSkills.style.display = any ? 'flex' : 'none';
+  setHTML(elSkills, !any ? '' : BAL.skills.map((k, i) => skillOpen(S, i) ? `<button class="sk" data-k="sk${i}" data-act="sk" data-v="${i}"><i></i><span>${k.n}</span><b></b></button>` : `<button class="sk lock" disabled><span>${FORMS['f' + k.st].n}解锁</span></button>`).join(''));
+}
+function updateSkills() {   // every frame: the shade drains as the cooldown runs out
+  BAL.skills.forEach((k, i) => {
+    const b = skillOpen(S, i) && elSkills.querySelector(`[data-v="${i}"]`); if (!b) return;
+    const cd = Math.max(0, S.cd[i]), txt = cd > 0 ? Math.ceil(cd) : '';
+    b.firstChild.style.height = (cd / k.cd * 100).toFixed(1) + '%';
+    if (b.lastChild.__t !== txt) { b.lastChild.textContent = txt; b.lastChild.__t = txt; b.classList.toggle('ready', !txt); }
+  });
+}
 // overlay on the stage: mute + a boss button when the boss is waiting
 function renderOver() {
   const z = S.maxZone, u = S.unlocked[z], showBoss = u && u[4] && !S.bossWins[z] && !(S.f && S.f.t === 4) && S.zone === z;

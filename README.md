@@ -8,7 +8,8 @@
 
 ## 怎么玩
 
-- 你是一只《山海经》里的**翼虎幼崽**，自动打怪，攒**精元**（自动升级）、**灵玉**和各区**材料**。
+- 你是一只《山海经》里的**翼虎幼崽**，自动打怪，攒**精元**（自动升级）、**灵玉**和各区**材料**。四档怪轮着打（自动巡山），越凶材料越多。
+- **动手更快**：点屏幕攒灵玉、偶尔掉材料；进化解锁**裂爪、怒吼、焚天**三个技能；大妖头上冒**「!」**时点它，取消它的招式并还手；偶尔出现的**宝匣**记得点开。
 - **装备**：7 个部位，掉落自动换上，贴着立绘画（翼甲、颈圈、头环、护腕、尾饰、符纹、灵珠）；用灵玉 + 材料强化。
 - **进化**：6 次，一路长成**上古穷奇**（翼虎幼崽 → 小翼虎 → 嗥虎 → 赤翼虎 → 邽山凶虎 → 穷奇 → 上古穷奇），每次战力 ×2.5、换立绘。
 - **山海**：8 个分区（南山经 → 大荒），每区一只守关大妖，各有一条规则；打倒后**图鉴上限放开**、开新区。
@@ -19,7 +20,8 @@
 
 - 源码在 `src/`，`python tools/sync.py` 写回单文件 `index.html`（别手改生成区）。`sh tools/dev.sh` = sync + 生成 `_test.html` + 语法检查。
 - 数值：`docs/NUMBERS.md`；模拟器 `node tools/sim.js --seeds 6 --hours 200 --nir 2`（直接跑 index.html 里的规则段）。
-- 浏览器试玩脚本：`_test.html#window.PLAY_H=40;fetch('tests/play.js').then(r=>r.text()).then(t=>eval(t))`。
+- 浏览器试玩脚本：`_test.html#window.PLAY_H=40;fetch('tests/play.js').then(r=>r.text()).then(t=>eval(t))`（`window.PLAY_ENGAGE=0` 不动手）。
+- 真实触摸测试：`node tests/touch.mjs`（无头 Chrome + 手机模拟，点按钮、点舞台、技能、宝匣、大妖的「!」）。
 - 上架物料在 `1gp-kit/`（封面、截图、15 秒宣传片）：封面 `index.html#cover1600`，截图 `tests/storeshots.js`，宣传片 `tools/trailer.js`（`record_video.py`）。
 - 美术（立绘、怪物、背景、装备图标）是 AI 起稿再缩成像素图，流程见 `docs/art-prompts.md`。
 - 改了文字跑 `python D:/Minigame/_workflow/tools/subset_font.py .`（字体是本地子集，全用像素字）。

@@ -47,6 +47,13 @@ const SFX = {
   bossFail() { tone(440, .3, 'triangle', .05, 220); },
   boss() { tone(196, .5, 'sawtooth', .04, 160); tone(784, .2, 'triangle', .03); },
   heavy() { noise(.2, .12, 600); tone(520, .12, 'triangle', .04, 300); },
+  tap() { if (!lim('tap', .06)) return; tone(1180 + Math.random() * 120, .03, 'triangle', .018); },
+  tele() { tone(980, .09, 'square', .035); tone(1320, .12, 'square', .03, 0, .09); },
+  parry() { noise(.06, .07, 3200, 0, 'bandpass'); [880, 1320, 1760].forEach((f, i) => tone(f, .09, 'triangle', .05, 0, i * .04)); },
+  dodge() { tone(1400, .1, 'sine', .04, 700); },
+  skill(i) { if (i === 1) { tone(150, .35, 'sawtooth', .06, 90); noise(.25, .06, 700); } else if (i === 2) { noise(.5, .09, 1400); tone(240, .4, 'sawtooth', .05, 520); } else { noise(.1, .1, 2600, 0, 'bandpass'); tone(520, .1, 'square', .04, 260); } },
+  chest() { [1046, 1318, 1568].forEach((f, i) => tone(f, .16, 'sine', .035, 0, i * .09)); },
+  open() { [784, 988, 1175, 1568].forEach((f, i) => tone(f, .14, 'triangle', .05, 0, i * .06)); },
 };
 function vib(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
 // ------------------------------------------------------------ music: pentatonic plucks, a calm loop per mood

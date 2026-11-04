@@ -76,7 +76,8 @@ function enemySprite(z, t) {
   return (ESPR[k] = { l, w: l.width, h: l.height, white: tintC(l, '#ffffff'), red: tintC(l, '#ff4a3a', .45), sil: tintC(l, '#2a2038') });
 }
 // ------------------------------------------------------------ live state of the stage
-const FX = { lunge: 0, hurt: 0, eHit: 0, eDie: 0, eDieSpr: null, eDieX: 0, evo: 0, evoFrom: null, warn: 0, flood: 0, rel: 0, slash: 0, slashCr: false, eIn: 0 };
+const FX = { lunge: 0, hurt: 0, eHit: 0, eDie: 0, eDieSpr: null, eDieX: 0, evo: 0, evoFrom: null, warn: 0, flood: 0, rel: 0, slash: 0, slashCr: false, eIn: 0, hop: 0, shock: 0 };
+let GIFT = null, TELE_AT = null;              // the chest on the stage { x, y, t }; where the boss's "!" is drawn
 const LUNGE = .24, SLASH = .2, EDIE = .4, EIN = .35;
 const POPS = [], PARTS = [];
 function pop(s, x, y, col, size, life) { if (POPS.length > 14) POPS.shift(); POPS.push({ s, x, y, col: col || '#ffffff', size: size || 8, life: life || .9, max: life || .9 }); }
@@ -90,8 +91,9 @@ function hpBar(x, y, w, h, f, col, back) {
   g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x, y, Math.max(0, Math.round(w * clamp(f, 0, 1))), 1);
 }
 function updateFX(dt) {
-  for (const k of ['lunge', 'hurt', 'eHit', 'eDie', 'warn', 'flood', 'rel', 'slash', 'eIn']) if (FX[k] > 0) FX[k] = Math.max(0, FX[k] - dt);
+  for (const k of ['lunge', 'hurt', 'eHit', 'eDie', 'warn', 'flood', 'rel', 'slash', 'eIn', 'hop', 'shock']) if (FX[k] > 0) FX[k] = Math.max(0, FX[k] - dt);
   if (FX.evo > 0) FX.evo = Math.max(0, FX.evo - dt);
+  if (GIFT && (GIFT.t -= dt) <= 0) GIFT = null;
   for (let i = POPS.length - 1; i >= 0; i--) { const p = POPS[i]; p.life -= dt; p.y -= 12 * dt; if (p.life <= 0) POPS.splice(i, 1); }
   for (let i = PARTS.length - 1; i >= 0; i--) { const p = PARTS[i]; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 20 * dt; if (p.life <= 0) PARTS.splice(i, 1); }
 }
@@ -110,12 +112,13 @@ function drawStage(T) {
   const D = DER, spr = formSprite(S.form, gearOf(S));
   const breath = Math.sin(T * 2.4) > .2 ? 1 : 0, lp = FX.lunge > 0 ? 1 - FX.lunge / LUNGE : 1;
   const lunge = FX.lunge > 0 ? R(lp < .3 ? -lp / .3 * 2 : Math.sin((lp - .3) / .7 * Math.PI) * 6) : 0, knock = FX.hurt > .1 ? -1 : 0;
-  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge + knock, by = FLOOR - spr.gy;   // wide sprites slide left so the enemy stays clear
+  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge + knock, by = FLOOR - spr.gy - (FX.hop > 0 ? 1 : 0);   // wide sprites slide left so the enemy stays clear
   // shadow
   g.globalAlpha = .28; g.fillStyle = '#000'; g.fillRect(bx + 22, FLOOR - 1, 70, 3); g.globalAlpha = 1;
   // rarity aura: motes rising for each ornate (r >= 3) item worn
   const ornate = SLOTS.filter(s => S.slots[s.id].r >= 3).length;
   if (ornate && Math.random() < ornate * .04) { const r = Math.max(...SLOTS.map(s => S.slots[s.id].r)); part(bx + 30 + Math.random() * 60, FLOOR - 10 - Math.random() * 40, 0, -8, RAR[r].c, 1.6); }
+  if (S.roar > 0 && Math.random() < .6) part(bx + 26 + Math.random() * 60, FLOOR - Math.random() * 50, rand(-6, 6), -16, Math.random() < .5 ? '#ff9a3a' : '#ffd27a', .6);
   const dead = S.dead > 0, img = FX.evo > 1.2 ? spr.white : spr.cv;
   if (dead) g.globalAlpha = .35;
   // breathing: everything above the paws rises a pixel; the only stretched row is just above the ground, so it reads as legs straightening
@@ -124,6 +127,12 @@ function drawStage(T) {
   g.drawImage(img, 0, 0, spr.w, cut, bx, by - breath, spr.w, cut);
   if (FX.hurt > 0) { g.globalAlpha = .35 * FX.hurt / .2; g.drawImage(spr.red, bx, by - breath); }
   g.globalAlpha = 1;
+  if (FX.shock > 0) {   // 怒吼: a ring of sound leaves the head
+    const k = 1 - FX.shock / .45, rr = 8 + k * 70, cx = bx + spr.w * .6, cy = by + spr.gy * .35;
+    g.globalAlpha = 1 - k; g.fillStyle = '#ffe9b0';
+    for (let a = 0; a < 6.283; a += .1) g.fillRect(R(cx + Math.cos(a) * rr), R(cy + Math.sin(a) * rr * .8), 2, 1);
+    g.globalAlpha = 1;
+  }
   // floating orb
   const orbR = S.slots.orb.r;
   if (orbR >= 0) {
@@ -154,6 +163,16 @@ function drawStage(T) {
       if (S.f.z === 2) txt('贪 ×' + (1 + S.f.hits * .05).toFixed(2), hx + ew / 2, hy + 9, 6, '#ffd27a');
     }
   }
+  TELE_AT = null;
+  if (S.f && !dead && S.f.tele) {   // the boss's "!": a ring closes in while there is still time to answer
+    const e = enemySprite(S.f.z, S.f.t), tl = S.f.tele, k = clamp(tl.t / tl.T, 0, 1), px = clamp(W - 4 - e.w / 2, 116, W - 24), py = clamp(FLOOR + 1 - e.h + 10, 40, 90);
+    TELE_AT = [px, py];
+    g.fillStyle = '#ffffff'; g.globalAlpha = .9;
+    for (let a = 0; a < 6.283; a += .09) g.fillRect(R(px + Math.cos(a) * (13 + k * 14)), R(py + Math.sin(a) * (13 + k * 14)), 1, 1);
+    g.globalAlpha = 1;
+    disc(px, py, 12, OUT); disc(px, py, 11, Math.floor(T * 10) % 2 ? '#e8283a' : '#ff5a4a');
+    txt('!', px, py, 16, '#ffffff', 'center', OUT);
+  }
   if (FX.eDie > 0 && FX.eDieSpr) {   // sinks into the ground and fades
     const k = 1 - FX.eDie / EDIE, d = FX.eDieSpr, sink = R(k * k * 10);
     g.save(); g.beginPath(); g.rect(0, 0, W, FLOOR + 1); g.clip();
@@ -161,6 +180,13 @@ function drawStage(T) {
     g.restore(); g.globalAlpha = 1;
   }
   if (dead) txt('复活中…', 54, 70, 8, '#ffffff');
+  if (GIFT && (GIFT.t > 2 || Math.floor(T * 7) % 2)) {   // the chest bobs in the air, and blinks before it leaves
+    const c = chestSprite(), y = GIFT.y + Math.sin(T * 3) * 2;
+    g.globalAlpha = .28 + .1 * Math.sin(T * 5); disc(GIFT.x, y, 17, '#ffe890'); g.globalAlpha = 1;
+    g.drawImage(c, R(GIFT.x - c.width / 2), R(y - c.height / 2));
+    if (Math.random() < .25) part(GIFT.x + rand(-13, 13), y + rand(-9, 9), 0, -10, '#fff4c0', .6);
+    txt('点开', GIFT.x, y - 15, 6, '#fff4c0');
+  }
   // particles
   for (const p of PARTS) { g.globalAlpha = clamp(p.life / p.max * 1.5, 0, 1); g.fillStyle = p.col; g.fillRect(Math.round(p.x), Math.round(p.y), p.sz, p.sz); }
   g.globalAlpha = 1;
@@ -173,8 +199,17 @@ function drawStage(T) {
   }
   // beast HP + header
   hpBar(6, FLOOR + 3, 70, 3, S.hp / D.hp, '#58d070', '#1a3a24');
-  txt(ZONES[z].n + ' · ' + (boss ? '大妖' : TIER_N[S.tier] + '档'), 4, 8, 8, '#ffffff', 'left');
+  txt(ZONES[z].n + ' · ' + (boss ? '大妖' : TIER_N[S.f ? S.f.t : S.tier] + '档'), 4, 8, 8, '#ffffff', 'left');
   for (const p of POPS) txt(p.s, p.x, p.y, p.size, p.col, 'center', OUT, Math.min(1, p.life / p.max * 2));
+}
+let CHEST = null;
+function chestSprite() {   // a small jade chest with gold bands
+  if (CHEST) return CHEST;
+  const rows = ['...gggggggggggggggg...', '..gJLLLLLLLLLLLLLLJg..', '.gJLLLLLLLLLLLLLLLLJg.', '.gJJJJJJJJJJJJJJJJJJg.', '.gggggggggGGGGggggggg.', '.gDDDDDDDDGRRGDDDDDDg.', '.gDJJJJJJJGRRGJJJJJDg.', '.gDJJJJJJJJGGJJJJJJDg.', '.gDJJJJJJJJJJJJJJJJDg.', '.gDDDDDDDDDDDDDDDDDDg.', '.gggggggggggggggggggg.'];
+  const C = { g: '#e8b030', G: '#ffe890', J: '#2f9a72', L: '#86e8b8', D: '#1c5c48', R: '#ff5a6a' }, G = new Grid(22, rows.length + 2);
+  rows.forEach((r, y) => [...r].forEach((ch, x) => { if (C[ch]) G.set(x, y + 1, C[ch]); }));
+  G.selOutline();
+  return (CHEST = G.canvas());
 }
 function slashFX(cx, cy, r, k, cr) {   // three claw marks sweeping down-left across the target
   const col = cr ? '#ffe070' : '#ffffff', a = k < .15 ? k / .15 : 1 - (k - .15) / .85, len = Math.min(1, k * 2.5);

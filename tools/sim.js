@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // Headless balance simulator for 山海异兽录.
 // Runs the real rules block (between "==== RULES BEGIN/END" in index.html) with simulated players.
-//   node tools/sim.js [--hours 48] [--seeds 6] [--who active,normal,idle] [--trace] [--nir 2]
+//   node tools/sim.js [--hours 48] [--seeds 6] [--who active,normal,idle] [--trace] [--nir 2] [--engage 1]
+//   --engage p: while online the player also taps (2 x p per second), casts skills, answers a boss's "!" with chance p and opens chests; 0 = hands off
 'use strict';
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i >= 0 ? process.argv[i + 1] : d; };
 const HOURS = +arg('hours', 60), SEEDS = +arg('seeds', 6), WHO = arg('who', 'active,normal,idle').split(','), TRACE = process.argv.includes('--trace');
-const NIR = +arg('nir', 0);
+const NIR = +arg('nir', 0), ENGAGE = +arg('engage', 0);
 const SRC = arg('src', path.join(__dirname, '..', 'index.html'));
 
 function loadRules(seed) {
@@ -15,7 +16,7 @@ function loadRules(seed) {
   const code = html.slice(a, b);
   const ctx = { Math, console };
   vm.createContext(ctx);
-  vm.runInContext(code + '\n;this.R = { BAL, SLOTS, newState, derive, step, setRnd, upgradeSlot, matZone, slotCost, slotCap, evoNeed, canEvolve, evolve, setFight, canFight, offlineGain, nirvana, canNirvana, nirvanaSouls, enemyStats, mastery, FORMS: typeof FORMS !== "undefined" ? FORMS : null };', ctx);
+  vm.runInContext(code + '\n;this.R = { BAL, SLOTS, newState, derive, step, setRnd, upgradeSlot, matZone, slotCost, slotCap, evoNeed, canEvolve, evolve, setFight, canFight, offlineGain, nirvana, canNirvana, nirvanaSouls, enemyStats, mastery, tap, castSkill, answerTele, openGift, skillOpen, FORMS: typeof FORMS !== "undefined" ? FORMS : null };', ctx);
   let s = seed >>> 0;
   ctx.R.setRnd(() => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; });
   return ctx.R;
@@ -33,7 +34,7 @@ function run(who, seed, nirRuns) {
   let S = R.newState();
   const DT = .1, T = HOURS * 3600, online = SCHED[who];
   let D = R.derive(S), dirty = false, t = 0, offSince = null;
-  const log = { runs: [{}], zone: {}, evo: [], boss: {}, deaths: 0, bossFails: 0, ups: [], nir: [], power: [], firstMin: [] };
+  const log = { runs: [{}], zone: {}, evo: [], boss: {}, deaths: 0, bossFails: 0, ups: [], nir: [], power: [], firstMin: [], gate: { gold: 0, mat: 0 } };
   let lastPow = 0, lastAct = -1e9, bossWait = 0, lastBossPow = 0;
   const E = (type, d) => {
     if (type === 'kill' || type === 'level' || type === 'item') dirty = true;
@@ -45,6 +46,7 @@ function run(who, seed, nirRuns) {
       if (log.runs.length > 1) return;
       log.boss[d.z] = log.boss[d.z] || { tries: 0 }; log.boss[d.z].tries++; log.boss[d.z].t = t;
       log.boss[d.z].p0 = D.power; log.boss[d.z].tj = t + 60;
+      log.boss[d.z].kills = [0, 1, 2, 3].map(k => S.kills[d.z + '-' + k] || 0);
     }
   };
   const lines = ['fox', 'fierce', 'dragon', 'auspicious'];
@@ -58,7 +60,7 @@ function run(who, seed, nirRuns) {
       for (const sl of R.SLOTS) {
         const s = S.slots[sl.id]; if (s.r < 0 || s.l >= R.slotCap(S)) continue;
         const c = R.slotCost(sl.id, s.l);
-        if (S.gold < c.gold || R.matZone(S, c, resv) < 0) continue;
+        if (S.gold < c.gold || R.matZone(S, c, resv) < 0) { if (t > 300) { if (S.gold < c.gold && R.matZone(S, c, resv) >= 0) log.gate.gold++; else log.gate.mat++; } continue; }
         opts.push({ sl: sl.id, cost: c.mat * (sl.k === 'atk' || sl.k === 'hp' ? 1 : 1.3) + s.l * .01 });
       }
       if (!opts.length) break;
@@ -74,10 +76,17 @@ function run(who, seed, nirRuns) {
     }
     if (S.bossWins[z] && S.zone < S.maxZone) { S.zone = S.maxZone; S.tier = 0; S.f = null; }
   };
-  let nextAct = 0, nextLog = 0, runStart = 0;
+  let nextAct = 0, nextLog = 0, runStart = 0, nextGift = 0;
   while (t < T) {
     if (online(t)) {
       if (offSince !== null) { const g = R.offlineGain(S, t - offSince); offSince = null; dirty = true; }
+      if (ENGAGE) {
+        if (Math.random() < 2 * ENGAGE * DT) R.tap(S, E);
+        for (let i = 0; i < R.BAL.skills.length; i++) R.castSkill(S, i, E, D);
+        const tl = S.f && S.f.tele;
+        if (tl && !tl.seen && tl.T - tl.t >= .5) { tl.seen = 1; if (Math.random() < ENGAGE) R.answerTele(S, E, D); }
+        if (t >= nextGift && Math.random() < R.BAL.giftRate * DT) { nextGift = t + R.BAL.giftGap; if (Math.random() < ENGAGE) { R.openGift(S, E); dirty = true; } }
+      }
       R.step(S, DT, E, D);
       if (dirty) { D = R.derive(S); dirty = false; }
       t += DT;
@@ -110,6 +119,10 @@ for (const who of WHO) {
     const jumps = runs.map(r => r.boss[z] && r.boss[z].jump).filter(Boolean);
     console.log(`  Z${z}: ${ts.length}/${SEEDS} ${fmt(ts[ts.length >> 1])} [${fmt(ts[0])}..${fmt(ts[ts.length - 1])}] tries ${(tries.reduce((a, b) => a + b, 0) / SEEDS).toFixed(1)} jump x${jumps.length ? (jumps.reduce((a, b) => a + b, 0) / jumps.length).toFixed(2) : '-'}`);
   }
+  const med = xs => xs.slice().sort((x, y) => x - y)[xs.length >> 1] || 0;
+  console.log('  kills per tier when the boss fell: ' + [0, 1, 2, 3, 4, 5, 6, 7].map(z => `Z${z} ` + [0, 1, 2, 3].map(k => med(runs.map(r => r.boss[z] && r.boss[z].kills ? r.boss[z].kills[k] : 0))).join('/')).join('  '));
+  const gt = runs.reduce((g, r) => ({ gold: g.gold + r.gate.gold, mat: g.mat + r.gate.mat }), { gold: 0, mat: 0 });
+  console.log(`  upgrades blocked (after 5 min): by gold only ${(gt.gold / (gt.gold + gt.mat) * 100).toFixed(1)}%, by materials ${(gt.mat / (gt.gold + gt.mat) * 100).toFixed(1)}%`);
   const ev = [];
   for (let s = 1; s <= 5; s++) { const ts = runs.map(r => (r.evo.find(e => e.stage === s) || {}).t).filter(x => x != null).sort((a, b) => a - b); const j = runs.map(r => (r.evo.find(e => e.stage === s) || {}).jump).filter(Boolean); ev.push(`E${s} ${fmt(ts[ts.length >> 1])} x${j.length ? (j.reduce((a, b) => a + b) / j.length).toFixed(2) : '-'}`); }
   console.log('  evolutions: ' + ev.join(' | '));
