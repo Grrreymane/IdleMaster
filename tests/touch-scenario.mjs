@@ -3,7 +3,7 @@ export default async ({ ev, touch, touchEl, rectOf, check, sleep }) => {
   // stage coordinates (the game's own 180 x 128) -> screen
   const stage = async (x, y) => { const r = await ev(`(()=>{const c=document.getElementById('c').getBoundingClientRect();return {l:c.left,t:c.top,w:c.width,h:c.height}})()`); return [r.l + x / 180 * r.w, r.t + y / 128 * r.h]; };
   const tapStage = async (x, y) => { const [a, b] = await stage(x, y); await touch(a, b); };
-  await ev('__t.TUT.i = 99; for (const k of ["tele","gift","sk0","tap"]) __t.TUT.f[k] = 1; __t.closeModal()');
+  await ev('__t.TUT.i = 99; for (const k of ["tele","gift","sk0","tap","quest"]) __t.TUT.f[k] = 1; __t.closeModal()');
   // ---- buttons outside the scrolling pane (they used to swallow touches)
   await touchEl('[data-act="tab"][data-v="gear"]'); await sleep(80);
   check('tab switches by touch', await ev('__t.TAB') === 'gear');
@@ -11,6 +11,13 @@ export default async ({ ev, touch, touchEl, rectOf, check, sleep }) => {
   check('变强 opens by touch', await ev('document.getElementById("modal").classList.contains("on")'));
   await touchEl('#mbox [data-act="close"]'); await sleep(80);
   check('modal button closes by touch', !await ev('document.getElementById("modal").classList.contains("on")'));
+  // ---- the first quest shows in the line under the HUD, and pays out by touch
+  await ev('__t.S.kills["0-0"] = 6; __t.renderUI()'); await sleep(80);
+  const m0 = await ev('__t.S.mats[0]');
+  await touchEl('[data-k="qclaim"]'); await sleep(100);
+  check('finished quest pays out by touch and moves on', await ev('__t.S.q') === 1 && await ev('__t.S.mats[0]') > m0, `桂枝 ${m0} -> ${await ev('__t.S.mats[0]')}`);
+  await ev('__t.renderUI()'); await sleep(60);
+  check('next quest shows its progress', (await ev('document.getElementById("goal").innerText')).includes('点虎崽'));
   // ---- taps on the stage
   const g0 = await ev('__t.S.gold'), t0 = await ev('__t.S.stats.taps');
   for (let i = 0; i < 4; i++) { await tapStage(50, 80); await sleep(60); }
@@ -31,6 +38,12 @@ export default async ({ ev, touch, touchEl, rectOf, check, sleep }) => {
   const gifts = await ev('__t.S.stats.gifts');
   await tapStage(90, 50); await sleep(80);
   check('chest opens by touch and goes away', await ev('__t.S.stats.gifts') === gifts + 1 && await ev('__t.GIFT === null'));
+  // ---- a gilded foe is tougher and pays many times over
+  await ev('__t.S.f = null'); await sleep(120);
+  await ev('__t.S.f.hp = __t.S.f.max = 1; __t.gildFoe(__t.S)');
+  const hp = await ev('__t.S.f.max'), k0 = await ev('__t.S.stats.kills'), mg = await ev('__t.S.mats[0]');
+  for (let i = 0; i < 60 && await ev('__t.S.stats.kills') === k0; i++) await sleep(50);
+  check('gilded foe has more HP and pays more', hp === 5 && await ev('__t.S.mats[0]') - mg >= 8, `材料 +${await ev('__t.S.mats[0]') - mg}`);
   // ---- a boss's "!": taps on the beast do not answer it, a tap on the enemy's side does
   await ev('__t.S.unlocked[0][4] = 1; __t.S.zone = 0; __t.spawn(__t.S, 0, 4); __t.S.f.hp = __t.S.f.max = 1e12; __t.S.f.hits = 3; __t.S.f.eT = 0; __t.S.hp = __t.DER.hp');
   for (let i = 0; i < 80 && !await ev('!!(__t.S.f && __t.S.f.tele)'); i++) await sleep(40);

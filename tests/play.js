@@ -12,7 +12,7 @@
   while (t < H * 3600) {
     // hands on unless window.PLAY_ENGAGE = 0: taps, skills, answers every "!", opens every chest (through the real event handlers)
     if (ENG) for (let i = 0, boss = S.f && S.f.t === 4; i < (boss ? 25 : 5); i++) {
-      advance(boss ? .2 : 1); tap(S, onEvent); BAL.skills.forEach((k, n) => castSkill(S, n, onEvent, DER)); if (S.f && S.f.tele) answerTele(S, onEvent, DER); if (GIFT) openChest(); if (dirty) recalc();
+      advance(boss ? .2 : 1); tap(S, onEvent); BAL.skills.forEach((k, n) => castSkill(S, n, onEvent, DER)); if (S.f && S.f.tele) answerTele(S, onEvent, DER); if (GIFT) openChest(); if (dirty) recalc(); while (questDone(S)) { claimQuest(S, onEvent, DER); recalc(); }
     } else advance(5);
     t += 5;
     if (t % 20 === 0) {
@@ -28,7 +28,7 @@
     if (S.bossWins[7]) { for (const k in S.bossWins) if (!clear[k]) clear[k] = t; break; }
   }
   const f = s => (s / 3600).toFixed(2) + 'h';
-  out.unshift(`play ${H}h: bosses ${Object.keys(clear).map(k => k + '@' + f(clear[k])).join(' ')} | evo ${Object.keys(evo).map(k => k + '@' + f(evo[k])).join(' ')} | Lv${S.lv} form ${S.form} M ${DER.M} deaths ${S.stats.deaths} taps ${S.stats.taps} casts ${S.stats.casts} parries ${S.stats.parries} gifts ${S.stats.gifts} kills ${S.kills['6-0']}/${S.kills['6-1']}/${S.kills['6-2']}/${S.kills['6-3']} errs ${errs} go ${hits}/${hits + miss} | ${((performance.now() - t0) / 1000).toFixed(1)}s`);
+  out.unshift(`play ${H}h: bosses ${Object.keys(clear).map(k => k + '@' + f(clear[k])).join(' ')} | evo ${Object.keys(evo).map(k => k + '@' + f(evo[k])).join(' ')} | Lv${S.lv} form ${S.form} M ${DER.M} deaths ${S.stats.deaths} taps ${S.stats.taps} casts ${S.stats.casts} parries ${S.stats.parries} gifts ${S.stats.gifts} quests ${S.q}/${QUESTS.length} kills ${S.kills['6-0']}/${S.kills['6-1']}/${S.kills['6-2']}/${S.kills['6-3']} errs ${errs} go ${hits}/${hits + miss} | ${((performance.now() - t0) / 1000).toFixed(1)}s`);
   if (window.KEEP) { document.title = 'DONE'; window.RES = out.join(' / '); TAB = 'beast'; renderUI(); return; }
   document.body.innerHTML = '<pre id="res" style="color:#fff;font:14px monospace;white-space:pre-wrap">' + out.join('\n') + '</pre>';
   document.title = 'DONE';

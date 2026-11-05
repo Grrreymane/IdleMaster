@@ -36,6 +36,8 @@ const BAL = {
     { n: '怒吼', d: '6 秒攻速 +100%', st: 2, cd: 25, roar: 6 },  // roar: seconds of +100% attack speed
     { n: '焚天', d: '连打 5 下 ×2', st: 4, cd: 40, burst: 5, hit: 2 },
   ],
+  questMat: .25, questXp: .1,              // a quest pays this many upgrades' worth of materials per r, and this share of the current level
+  gildGap: 300, gildRate: .1, gildHp: 5, gildPay: 8,   // the gilded foe: seconds between, chance per foe, HP x, rewards x
   teleT: 1.1, counter: 1.5,               // a boss's "!" stays this long; answering it also lands a blow of this size
   giftGap: 150, giftLife: 9, giftRate: .06, giftGear: .15, giftGold: .3, giftMat: .5,   // the chest: seconds between, seconds it stays, chance per kill; rewards
 };
@@ -59,6 +61,69 @@ const FORMS = {   // one family: the Qiongqi line (穷奇), cute cub -> legendar
   f5: { n: '穷奇', st: 5, next: ['f6'], tr: { boss: .15 }, td: '四凶之一：对大妖 +15%' },
   f6: { n: '上古穷奇', st: 6, next: [], tr: { fresh: .3, atkP: .1 }, td: '食人从首始：打高血量敌人 +30%，攻击 +10%' },
 };
+// quests: one at a time, the short goal the idle loop lacks (STI's quest board). Rewards are worth r upgrades of that zone's materials, so they matter.
+// k: kill (tier t) / tap / cast / parry / gift (since the quest began) / gold (hand over v kills' worth) / up (l slots at level v) / evo (stage v) / boss
+const QUESTS = [
+  { z: 0, k: 'kill', t: 0, v: 6, r: .5, n: '初试爪牙', o: '打旋龟', say: '旋龟缩进壳里，声如劈柴' },
+  { z: 0, k: 'tap', v: 30, r: 1, n: '摸摸虎头', o: '点虎崽', say: '虎崽翻了个肚皮' },
+  { z: 0, k: 'gold', v: 8, r: 1.5, n: '招摇山的香火', o: '上交灵玉', say: '山神：心诚则灵' },
+  { z: 0, k: 'up', l: 2, v: 3, r: 1, n: '磨尖爪子', o: '2 件装备到 Lv3', say: '抓哪哪破' },
+  { z: 0, k: 'evo', v: 1, r: 1, n: '换一身毛', o: '进化成小翼虎', say: '胎毛褪了，翅膀硬了点' },
+  { z: 0, k: 'cast', v: 3, r: 1, n: '试试新爪', o: '放裂爪', say: '树都抖了三抖' },
+  { z: 0, k: 'kill', t: 3, v: 15, r: 1.5, n: '长右现形', o: '打长右', say: '长右一现，郡县大水。今天算了' },
+  { z: 0, k: 'parry', v: 1, r: 1, n: '看穿一招', o: '点到大妖的「!」', say: '它愣了一下' },
+  { z: 0, k: 'boss', v: 1, r: 2, n: '婴啼声起', o: '打倒蛊雕', say: '婴啼声停了' },
+  { z: 1, k: 'evo', v: 2, r: 1, n: '喉咙痒痒', o: '进化成嗥虎', say: '一声嗥叫，像狗。不许笑' },
+  { z: 1, k: 'kill', t: 0, v: 30, r: 1, n: '拆散一对', o: '打蛮蛮', say: '比翼而飞？飞不动了' },
+  { z: 1, k: 'kill', t: 1, v: 40, r: 1, n: '抢石头', o: '打举父', say: '举父的石头砸偏了' },
+  { z: 1, k: 'gold', v: 8, r: 1.5, n: '昆仑的门票', o: '上交灵玉', say: '开明兽收了钱，转过九个头' },
+  { z: 1, k: 'up', l: 3, v: 13, r: 1, n: '再磨一遍', o: '3 件装备到 Lv13', say: '爪尖发亮' },
+  { z: 1, k: 'kill', t: 3, v: 40, r: 1.5, n: '灭火', o: '打毕方', say: '毕方单脚跳走了' },
+  { z: 1, k: 'boss', v: 1, r: 2, n: '无面之舞', o: '打倒帝江', say: '它不会说话，但很会跳舞' },
+  { z: 2, k: 'evo', v: 3, r: 1, n: '翅膀红了', o: '进化成赤翼虎', say: '风一吹，翼上像着了火' },
+  { z: 2, k: 'kill', t: 0, v: 40, r: 1, n: '追尾巴', o: '打耳鼠', say: '耳鼠甩尾飞走了' },
+  { z: 2, k: 'kill', t: 1, v: 40, r: 1, n: '一头十身', o: '打何罗鱼', say: '十条身子一起逃' },
+  { z: 2, k: 'gift', v: 1, r: 1.5, n: '雪里的匣子', o: '点开宝匣', say: '匣子里有股桂花味' },
+  { z: 2, k: 'kill', t: 2, v: 40, r: 1, n: '雪中伏兵', o: '打孟极', say: '孟极趴在雪里不敢动' },
+  { z: 2, k: 'up', l: 4, v: 24, r: 1, n: '换副好爪', o: '4 件装备到 Lv24', say: '寒铁就是好' },
+  { z: 2, k: 'boss', v: 1, r: 2, n: '贪食者', o: '打倒狍鸮', say: '贪到把自己吃了' },
+  { z: 3, k: 'kill', t: 0, v: 120, r: 1, n: '六条腿也没用', o: '打从从', say: '从从跑得比你想的慢' },
+  { z: 3, k: 'tap', v: 100, r: 1, n: '手别停', o: '点虎崽', say: '虎崽：差不多行了' },
+  { z: 3, k: 'kill', t: 2, v: 150, r: 1, n: '人面猪身', o: '打合窳', say: '合窳的脸比猪还委屈' },
+  { z: 3, k: 'gold', v: 8, r: 1.5, n: '泰山的香火', o: '上交灵玉', say: '封禅的钱，你也出了一份' },
+  { z: 3, k: 'parry', v: 3, r: 1, n: '再看穿三招', o: '点到大妖的「!」', say: '大妖开始躲你的眼神' },
+  { z: 3, k: 'kill', t: 3, v: 150, r: 1.5, n: '赶走瘟神', o: '打蜚', say: '蜚走过的地方，草又长回来了' },
+  { z: 3, k: 'boss', v: 1, r: 2, n: '四凶之一', o: '打倒梼杌', say: '四凶少了一个，还有你' },
+  { z: 4, k: 'evo', v: 4, r: 1, n: '是食人', o: '进化成邽山凶虎', say: '名字越来越长，脾气越来越坏' },
+  { z: 4, k: 'kill', t: 0, v: 100, r: 1, n: '解忧', o: '打朏朏', say: '摸了摸它，心情好多了' },
+  { z: 4, k: 'kill', t: 1, v: 120, r: 1, n: '让它闭嘴', o: '打山膏', say: '山膏骂得真难听' },
+  { z: 4, k: 'cast', v: 10, r: 1, n: '焚天试手', o: '放技能', say: '伊水冒起了白气' },
+  { z: 4, k: 'up', l: 5, v: 44, r: 1, n: '青铜爪', o: '5 件装备到 Lv44', say: '敲一下，当当响' },
+  { z: 4, k: 'kill', t: 3, v: 120, r: 1.5, n: '一角巨兽', o: '打犀渠', say: '犀渠的叫声像婴儿，别心软' },
+  { z: 4, k: 'boss', v: 1, r: 2, n: '半个亲戚', o: '打倒马腹', say: '人面虎身，算半个亲戚' },
+  { z: 5, k: 'kill', t: 0, v: 250, r: 1, n: '再拆一对', o: '打比翼鸟', say: '又拆散一对，你没有心' },
+  { z: 5, k: 'kill', t: 1, v: 300, r: 1, n: '两头堵', o: '打并封', say: '两个头都认输了' },
+  { z: 5, k: 'gift', v: 1, r: 1.5, n: '漂来的匣子', o: '点开宝匣', say: '一股海腥味' },
+  { z: 5, k: 'gold', v: 8, r: 1.5, n: '过海费', o: '上交灵玉', say: '龙鱼载你过了海' },
+  { z: 5, k: 'up', l: 6, v: 54, r: 1, n: '珊瑚镶爪', o: '6 件装备到 Lv54', say: '好看，也好使' },
+  { z: 5, k: 'kill', t: 3, v: 300, r: 1.5, n: '白马不回头', o: '打蛩蛩', say: '蛩蛩跑了，又回来了，又跑了' },
+  { z: 5, k: 'boss', v: 1, r: 2, n: '九头怪', o: '打倒相柳', say: '九个头都在喊疼' },
+  { z: 6, k: 'evo', v: 5, r: 1, n: '恶名昭彰', o: '进化成穷奇', say: '现在，你就是四凶之一' },
+  { z: 6, k: 'kill', t: 0, v: 300, r: 1, n: '抢你台词', o: '打蜪犬', say: '食人从首始？这是你的台词' },
+  { z: 6, k: 'kill', t: 2, v: 300, r: 1, n: '一角青牛', o: '打兕', say: '兕的皮能做甲，先别急' },
+  { z: 6, k: 'tap', v: 200, r: 1, n: '手还没断', o: '点穷奇', say: '穷奇：再摸咬你' },
+  { z: 6, k: 'up', l: 6, v: 64, r: 1, n: '琅玕爪', o: '6 件装备到 Lv64', say: '昆仑的玉，磨爪正好' },
+  { z: 6, k: 'kill', t: 3, v: 250, r: 1.5, n: '吞象之蛇', o: '打巴蛇', say: '巴蛇吞象，这次没吞成' },
+  { z: 6, k: 'boss', v: 1, r: 2, n: '不死药', o: '打倒窫窳', say: '不死药，也有失手的时候' },
+  { z: 7, k: 'evo', v: 6, r: 1, n: '上古穷奇', o: '进化成上古穷奇', say: '从幼崽到这里，辛苦了' },
+  { z: 7, k: 'kill', t: 0, v: 300, r: 1, n: '三身一体', o: '打双双', say: '三个身子一起认输' },
+  { z: 7, k: 'kill', t: 1, v: 300, r: 1, n: '前后夹击', o: '打屏蓬', say: '前后两个头吵起来了' },
+  { z: 7, k: 'kill', t: 2, v: 300, r: 1, n: '九首之鸟', o: '打九凤', say: '九个头，一个都没抬起来' },
+  { z: 7, k: 'gold', v: 8, r: 1.5, n: '十日的税', o: '上交灵玉', say: '太阳也要吃饭' },
+  { z: 7, k: 'up', l: 7, v: 74, r: 1, n: '日精爪', o: '7 件装备到 Lv74', say: '爪子会发光了' },
+  { z: 7, k: 'kill', t: 3, v: 300, r: 1.5, n: '衔蛇之人', o: '打强良', say: '蛇先跑了' },
+  { z: 7, k: 'boss', v: 1, r: 2, n: '一足之兽', o: '打倒夔', say: '其皮为鼓，声闻五百里' },
+];
 // ------------------------------------------------------------ formulas
 const eLv = (z, t) => 10 * z + (t === 4 ? BAL.bossLv : BAL.tierLv[t]);
 function enemyStats(z, t) {
@@ -94,7 +159,7 @@ function newState() {
     zone: 0, tier: 0, maxZone: 0, unlocked: [[1, 0, 0, 0, 0]], auto: true,
     bossWins: {}, pity: 0, souls: 0, nirCount: 0, bestLv: 1,
     f: null, hp: -1, dead: 0, calm: 0, top: 3,
-    cd: [0, 0, 0], roar: 0, burst: null,
+    cd: [0, 0, 0], roar: 0, burst: null, q: 0, qBase: 0,
     stats: { kills: 0, deaths: 0, bossTries: 0, play: 0, taps: 0, casts: 0, parries: 0, gifts: 0 },
   };
   S.items['claw:0'] = 1; S.slots.claw.r = 0;   // a plain claw to start with
@@ -244,6 +309,32 @@ function answerTele(S, E, D) {
   E('parry', k); strike(S, E, D, BAL.counter);
   return true;
 }
+// ------------------------------------------------------------ quests
+const QSTAT = { tap: 'taps', cast: 'casts', parry: 'parries', gift: 'gifts' };
+function questNow(S) { const q = QUESTS[S.q]; return q && q.z <= S.maxZone ? q : null; }
+function questGoal(q) { return q.k === 'gold' ? Math.ceil(enemyStats(q.z, 3).gold * q.v) : q.k === 'up' ? q.l : q.v; }
+function questProgress(S, q) {
+  if (q.k === 'kill') return S.kills[SP(q.z, q.t)] || 0;
+  if (q.k === 'boss') return S.bossWins[q.z] ? 1 : 0;
+  if (q.k === 'evo') return S.stage;
+  if (q.k === 'gold') return S.gold;
+  if (q.k === 'up') return SLOTS.filter(s => S.slots[s.id].l >= q.v).length;
+  return S.stats[QSTAT[q.k]] - S.qBase;
+}
+function questDone(S) { const q = questNow(S); return !!q && questProgress(S, q) >= questGoal(q); }
+function questPay(q) { return { mat: Math.ceil(slotCost('', 10 * q.z + 5).mat * q.r * BAL.questMat), gold: q.k === 'gold' ? 0 : enemyStats(q.z, 3).gold * 5 }; }
+function claimQuest(S, E, D) {
+  if (!questDone(S)) return false;
+  const q = QUESTS[S.q], p = questPay(q);
+  if (q.k === 'gold') S.gold -= questGoal(q);
+  S.mats[q.z] += p.mat; S.gold += p.gold; S.xp += needXp(S.lv) * BAL.questXp; levelUp(S, E, D);
+  S.q++; const nx = QUESTS[S.q]; S.qBase = nx && QSTAT[nx.k] ? S.stats[QSTAT[nx.k]] : 0;
+  E('quest', { q, ...p });
+  if (q.k === 'boss') dropItem(S, E, q.z, BAL.bossMinR[q.z]);
+  return true;
+}
+// a gilded foe: turns up now and then while you are watching; tougher, and pays many times over
+function gildFoe(S) { const f = S.f; if (!f || f.t === 4) return false; f.gilded = 1; f.hp = f.max = f.max * BAL.gildHp; return true; }
 // the chest that turns up while you are watching: half an upgrade's worth of materials, some 灵玉, or a piece of gear
 function openGift(S, E) {
   const z = S.zone, x = rnd(); S.stats.gifts++;
@@ -266,11 +357,12 @@ function bossFail(S, E, why) { const z = S.f.z; S.f = null; S.tier = 3; E('bossF
 function kill(S, E, D) {
   const f = S.f, e = enemyStats(f.z, f.t), sp = SP(f.z, f.t);
   S.kills[sp] = (S.kills[sp] || 0) + 1; S.stats.kills++;
-  const xp = e.xp * D.xp, gd = e.gold * D.gold, m0 = (f.t === 4 ? 30 : BAL.matT[f.t]) * D.mat, mat = Math.floor(m0) + (rnd() < m0 % 1 ? 1 : 0);
+  const gp = f.gilded ? BAL.gildPay : 1, xp = e.xp * D.xp * gp, gd = e.gold * D.gold * gp, m0 = (f.t === 4 ? 30 : BAL.matT[f.t]) * D.mat * gp, mat = Math.floor(m0) + (rnd() < m0 % 1 ? 1 : 0);
   S.xp += xp; S.gold += gd; S.mats[f.z] += mat;
   if (D.tr.killHeal) S.hp = Math.min(D.hp, S.hp + D.hp * D.tr.killHeal);
   S.f = null;
-  E('kill', { z: f.z, t: f.t, xp, gold: gd, mat });
+  E('kill', { z: f.z, t: f.t, xp, gold: gd, mat, gilded: f.gilded });
+  if (f.gilded) dropItem(S, E, f.z, -1);
   levelUp(S, E, D);
   const u = S.unlocked[f.z];
   if (f.t < 3 && !u[f.t + 1] && S.kills[sp] >= BAL.unlockKills) { u[f.t + 1] = 1; E('unlock', { z: f.z, t: f.t + 1 }); }
@@ -333,7 +425,7 @@ function canNirvana(S) { return !!S.bossWins[7]; }
 function nirvana(S) {
   if (!canNirvana(S)) return null;
   const N = newState();
-  Object.assign(N, { items: S.items, kills: S.kills, forms: S.forms, souls: Math.min(BAL.nirMax, S.souls + nirvanaSouls(S)), nirCount: S.nirCount + 1, stats: S.stats });
+  Object.assign(N, { items: S.items, kills: S.kills, forms: S.forms, q: S.q, qBase: S.qBase, souls: Math.min(BAL.nirMax, S.souls + nirvanaSouls(S)), nirCount: S.nirCount + 1, stats: S.stats });
   for (const id in S.items) { const [sl, r] = id.split(':'); N.slots[sl].r = Math.max(N.slots[sl].r, +r); }   // keeps gear qualities, not levels
   return N;
 }

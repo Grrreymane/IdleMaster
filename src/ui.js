@@ -62,8 +62,20 @@ function guideList() {
   else if (u && u[4] && !S.bossWins[z]) L.push({ t: `攒材料强化，再战${ZONES[z].boss}（胜算 ${Math.round(bossOdds(z) * 100)}%）`, go: ['gear', 'allup'], k: 'farm', wait: 1 });
   return L;
 }
+// the line under the HUD: a finished quest first, then whatever can be done right now, then the current quest, then what is being waited for
+function questText(q) { const g = questGoal(q), p = Math.min(questProgress(S, q), g); return q.k === 'boss' || q.k === 'evo' ? q.o : `${q.o} ${fmt(p)}/${fmt(g)}`; }
+function questGo(q) {
+  if (q.k === 'kill') return ['map', q.z === S.zone ? 'tier' + q.t : 'zone' + q.z];
+  if (q.k === 'boss' || q.k === 'parry') { const z = q.k === 'boss' ? q.z : S.maxZone; return ['map', z === S.zone ? 'boss' + z : 'zone' + z]; }
+  if (q.k === 'up') return ['gear', 'allup'];
+  if (q.k === 'evo') return ['beast', 'evo'];
+  return null;
+}
 function renderGoal() {
-  const L = guideList(), top = L[0];
+  const L = guideList(), q = questNow(S), act = L.find(x => !x.wait);
+  if (q && questDone(S)) { setHTML(elGoal, `<span class="t">📜 ${q.n} ✔</span><button class="btn s g glow" data-k="qclaim" data-act="qclaim">${q.k === 'gold' ? '上交' : '领奖'}</button><button class="btn s" data-act="guide">变强</button>`); return; }
+  if (q && !act) { const go = questGo(q); setHTML(elGoal, `<span class="t">📜 ${questText(q)}</span>${go ? `<button class="btn s b" data-act="go" data-v="${go.join(':')}">前往</button>` : ''}<button class="btn s" data-act="guide">变强</button>`); return; }
+  const top = L[0];
   const h = top ? `<span class="t">${top.wait ? '⏳ ' : '▶ '}${top.t}</span><button class="btn s ${top.wait ? 'b' : 'g'}" data-act="go" data-v="${top.go.join(':')}">前往</button><button class="btn s" data-act="guide">变强</button>`
     : `<span class="t">⏳ 挂机即可</span><button class="btn s" data-act="guide">变强</button>`;
   setHTML(elGoal, h);

@@ -18,6 +18,7 @@ const TUT_FREE = [
   { id: 'tele', first: 1, text: '出现「!」就点它', pt: () => TELE_AT, show: () => !!(S.f && S.f.tele && TELE_AT), done: () => S.stats.parries > 0 },
   { id: 'gift', first: 1, text: '宝匣！点开它', pt: () => GIFT && [GIFT.x, GIFT.y], show: () => !!GIFT, done: () => S.stats.gifts > 0 },
   { id: 'sk0', text: '新技能！点它', sel: '[data-k="sk0"]', show: () => skillOpen(S, 0) && S.cd[0] <= 0, done: () => S.stats.casts > 0 },
+  { id: 'quest', text: '任务完成！点这里领奖', sel: '[data-k="qclaim"]', show: () => questDone(S), done: () => S.q > 0 },
   { id: 'tap', text: '点点它：攒灵玉，还会掉材料', pt: () => [48, 84], show: () => TUT.i >= 1 && S.stats.kills > 2, done: () => S.stats.taps >= 6 },
 ];
 function tutClick(act) { TUT.clicked = act; }

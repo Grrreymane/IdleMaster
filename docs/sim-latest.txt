@@ -1,134 +1,186 @@
 
 === active (6 seeds, 200h) ===
 boss clear time per zone (median / min / max), tries, power jump at kill
-  Z0: 6/6 22m [17m..25m] tries 6.8 jump x2.37
-  Z1: 6/6 2.0h [2.0h..2.0h] tries 8.5 jump x2.51
-  Z2: 6/6 2.4h [2.3h..2.4h] tries 9.2 jump x2.74
-  Z3: 6/6 6.0h [4.6h..6.1h] tries 28.2 jump x2.96
-  Z4: 6/6 8.2h [8.0h..8.5h] tries 18.0 jump x3.38
-  Z5: 6/6 14.7h [14.3h..24.0h] tries 29.3 jump x4.18
-  Z6: 6/6 26.0h [24.3h..26.3h] tries 14.5 jump x4.48
-  Z7: 6/6 30.5h [30.0h..32.0h] tries 16.7 jump x0.00
-  kills per tier when the boss fell: Z0 170/159/107/93  Z1 313/302/292/286  Z2 172/163/155/126  Z3 875/863/859/588  Z4 572/563/555/486  Z5 1764/1753/1753/1431  Z6 1803/1794/1701/518  Z7 1744/1733/1734/1438
+  Z0: 6/6 22m [17m..28m] tries 6.7 jump x2.46
+  Z1: 6/6 2.0h [45m..2.0h] tries 8.8 jump x2.69
+  Z2: 6/6 2.3h [2.3h..2.5h] tries 9.3 jump x2.73
+  Z3: 6/6 6.0h [4.5h..6.0h] tries 27.3 jump x3.14
+  Z4: 6/6 8.0h [6.7h..8.1h] tries 18.0 jump x3.48
+  Z5: 6/6 14.4h [14.0h..14.7h] tries 28.3 jump x3.82
+  Z6: 6/6 24.4h [24.3h..24.4h] tries 12.8 jump x4.44
+  Z7: 6/6 30.0h [30.0h..30.5h] tries 18.7 jump x0.00
+  kills per tier when the boss fell: Z0 150/141/101/74  Z1 308/297/286/282  Z2 154/144/135/122  Z3 823/812/807/532  Z4 640/631/486/480  Z5 1715/1703/1705/1257  Z6 1703/1694/1686/1392  Z7 1665/1654/1653/1247
   upgrades blocked (after 5 min): by gold only 0.0%, by materials 100.0%
-  evolutions: E1 7m x2.43 | E2 24m x2.50 | E3 2.1h x2.61 | E4 6.2h x2.38 | E5 24.0h x2.50
-  deaths 69  bossFails 123.2
-  first 5 min: 17 improvements, longest gap 63s [20,13,22,14,9,3,15,12,13,31,3,17,25,8,63,5,26]
-  final: Lv98 stage6 zone7 power 2.22e+19 M 729/1000000000
-  ln-share of atk: lv 16% evo 14% gear 40% M 27% nir 4%
-  nirvana: run 30.5h souls 36 | run 17.5h souls 37
-   run 1: 22m 2.0h 2.4h 4.6h 8.0h 14.6h 24.3h 30.5h
-   run 2: 0m 1m 5m 1.6h 2.1h 5.5h 7.5h 17.5h
-   run 3: 0m 1m 3m 21m 2.0h 2.6h 4.6h 6.5h
+  quests claimed: 1 (first 10 at   -  )
+  evolutions: E1 7m x2.43 | E2 24m x2.50 | E3 2.1h x2.60 | E4 6.2h x2.39 | E5 24.0h x2.50
+  deaths 73  bossFails 122.0
+  first 5 min: 18 improvements, longest gap 64s [20,10,15,1,19,3,9,9,9,11,20,17,4,20,17,64,11,25]
+  final: Lv98 stage6 zone7 power 1.94e+19 M 720/1000000000
+  ln-share of atk: lv 16% evo 14% gear 41% M 27% nir 4%
+  nirvana: run 30.0h souls 36 | run 18.0h souls 37
+   run 1: 23m 2.0h 2.3h 4.5h 6.7h 14.4h 24.4h 30.0h
+   run 2: 0m 1m 4m 35m 2.1h 4.4h 6.6h 18.0h
+   run 3: 0m 1m 3m 21m 43m 2.7h 4.5h 6.5h
 
 === normal (6 seeds, 200h) ===
 boss clear time per zone (median / min / max), tries, power jump at kill
-  Z0: 6/6 2.0h [13m..2.1h] tries 3.8 jump x2.78
-  Z1: 6/6 4.0h [2.1h..4.0h] tries 4.7 jump x2.51
-  Z2: 6/6 4.2h [4.0h..6.0h] tries 7.3 jump x3.61
-  Z3: 6/6 10.0h [8.2h..10.2h] tries 13.8 jump x3.18
-  Z4: 6/6 14.0h [12.1h..14.1h] tries 8.5 jump x3.45
-  Z5: 6/6 28.0h [24.1h..30.0h] tries 12.7 jump x3.91
-  Z6: 6/6 36.0h [32.0h..38.0h] tries 10.7 jump x4.56
-  Z7: 6/6 48.0h [48.0h..50.1h] tries 9.5 jump x0.00
-  kills per tier when the boss fell: Z0 314/304/268/257  Z1 331/310/300/284  Z2 330/321/310/224  Z3 976/965/726/630  Z4 684/673/653/367  Z5 2335/2325/2319/1037  Z6 1417/1407/1401/1037  Z7 2073/2063/2058/1694
+  Z0: 6/6 2.0h [2.0h..2.1h] tries 4.5 jump x2.72
+  Z1: 6/6 4.0h [2.2h..4.0h] tries 5.3 jump x2.61
+  Z2: 6/6 4.2h [4.2h..6.0h] tries 7.7 jump x3.06
+  Z3: 6/6 10.0h [8.2h..10.1h] tries 14.8 jump x3.03
+  Z4: 6/6 14.0h [12.2h..14.0h] tries 9.5 jump x3.70
+  Z5: 6/6 28.0h [26.2h..28.0h] tries 13.5 jump x3.86
+  Z6: 6/6 34.0h [34.0h..36.0h] tries 10.2 jump x4.48
+  Z7: 6/6 50.0h [48.0h..50.0h] tries 10.2 jump x0.00
+  kills per tier when the boss fell: Z0 323/312/275/265  Z1 317/305/295/290  Z2 118/105/97/80  Z3 1067/1057/817/621  Z4 669/659/652/564  Z5 2378/2368/2357/711  Z6 1373/1364/1354/1012  Z7 2083/2071/2066/1675
   upgrades blocked (after 5 min): by gold only 0.0%, by materials 100.0%
-  evolutions: E1 6m x2.43 | E2 2.0h x2.50 | E3 4.1h x2.61 | E4 10.2h x2.39 | E5 30.0h x2.50
-  deaths 31  bossFails 63.0
-  first 5 min: 17 improvements, longest gap 65s [30,3,27,9,9,12,5,10,3,12,30,5,25,15,10,65,2]
-  final: Lv96 stage6 zone7 power 1.36e+19 M 733/1000000000
+  quests claimed: 1 (first 10 at   -  )
+  evolutions: E1 7m x2.43 | E2 2.0h x2.50 | E3 4.1h x2.60 | E4 10.2h x2.39 | E5 30.0h x2.50
+  deaths 34  bossFails 67.7
+  first 5 min: 19 improvements, longest gap 66s [30,15,1,22,7,2,13,4,11,14,15,9,6,30,9,66,6,10,15]
+  final: Lv96 stage6 zone7 power 1.46e+19 M 724/1000000000
   ln-share of atk: lv 16% evo 14% gear 40% M 27% nir 4%
-  nirvana: run 50.1h souls 37 | run 21.9h souls 38
-   run 1: 2.1h 4.0h 4.2h 10.0h 14.0h 28.0h 36.2h 50.1h
-   run 2: 0m 1m 4m 2.0h 3.9h 6.1h 10.0h 21.9h
-   run 3: 0m 1m 3m 2.0h 2.1h 4.2h 8.0h 10.1h
+  nirvana: run 48.0h souls 36 | run 14.2h souls 37
+   run 1: 2.0h 4.0h 4.2h 10.0h 14.0h 26.2h 34.0h 48.0h
+   run 2: 0m 1m 5m 2.0h 4.0h 6.2h 10.2h 14.2h
+   run 3: 0m 1m 3m 9.8h 9.9h 11.8h 12.0h 13.8h
 
 === idle (6 seeds, 200h) ===
 boss clear time per zone (median / min / max), tries, power jump at kill
-  Z0: 6/6 4.0h [4.0h..4.1h] tries 1.0 jump x2.24
-  Z1: 6/6 8.0h [8.0h..8.0h] tries 1.5 jump x2.40
-  Z2: 6/6 12.0h [8.1h..12.0h] tries 5.0 jump x3.52
-  Z3: 6/6 24.0h [24.0h..24.0h] tries 2.3 jump x2.91
-  Z4: 6/6 28.0h [28.0h..28.0h] tries 4.0 jump x3.53
-  Z5: 6/6 36.0h [36.0h..36.0h] tries 5.2 jump x3.82
-  Z6: 6/6 48.0h [48.0h..48.0h] tries 3.3 jump x4.43
-  Z7: 6/6 60.0h [56.0h..60.0h] tries 5.0 jump x0.00
-  kills per tier when the boss fell: Z0 694/685/649/16  Z1 513/504/495/486  Z2 518/508/498/490  Z3 1481/1472/1462/1452  Z4 522/512/503/494  Z5 1032/1023/1013/1005  Z6 1971/1962/1953/17  Z7 1706/1697/1686/1032
+  Z0: 6/6 4.0h [4.0h..4.1h] tries 1.0 jump x2.16
+  Z1: 6/6 8.0h [8.0h..8.0h] tries 1.5 jump x2.37
+  Z2: 6/6 12.0h [12.0h..12.0h] tries 5.0 jump x2.79
+  Z3: 6/6 24.0h [24.0h..24.0h] tries 2.8 jump x3.04
+  Z4: 6/6 28.0h [28.0h..28.0h] tries 3.0 jump x3.68
+  Z5: 6/6 36.0h [36.0h..48.0h] tries 5.2 jump x3.88
+  Z6: 6/6 48.0h [48.0h..52.0h] tries 3.2 jump x4.43
+  Z7: 6/6 60.0h [60.0h..60.0h] tries 6.2 jump x0.00
+  kills per tier when the boss fell: Z0 696/686/646/16  Z1 515/505/496/487  Z2 517/507/498/489  Z3 1480/1471/1462/1452  Z4 522/513/504/494  Z5 1032/1022/1012/1004  Z6 1971/1962/1953/16  Z7 1703/1694/1684/1028
   upgrades blocked (after 5 min): by gold only 0.0%, by materials 100.0%
+  quests claimed: 1 (first 10 at   -  )
   evolutions: E1 4.0h x2.43 | E2 4.1h x2.50 | E3 8.1h x2.61 | E4 28.0h x2.38 | E5 48.0h x2.50
-  deaths 8  bossFails 19.3
-  first 5 min: 13 improvements, longest gap 53s [30,4,26,12,26,7,15,5,41,18,26,1,53]
-  final: Lv95 stage6 zone7 power 3.64e+18 M 718/1000000000
-  ln-share of atk: lv 16% evo 14% gear 39% M 28% nir 5%
+  deaths 8  bossFails 19.8
+  first 5 min: 16 improvements, longest gap 62s [30,15,27,18,30,42,4,19,2,6,3,15,15,4,6,62]
+  final: Lv95 stage6 zone7 power 4.64e+18 M 733/1000000000
+  ln-share of atk: lv 16% evo 14% gear 38% M 28% nir 5%
   nirvana: run 60.0h souls 36 | run 24.0h souls 37
-   run 1: 4.1h 8.0h 12.0h 24.0h 28.0h 36.0h 48.0h 60.0h
+   run 1: 4.0h 8.0h 12.0h 24.0h 28.0h 36.0h 48.0h 60.0h
    run 2: 0m 1m 4m 12.0h 12.0h 16.0h 20.0h 24.0h
-   run 3: 0m 1m 3m 12.0h 12.0h 16.0h 16.1h 20.0h
+   run 3: 0m 1m 3m 12.0h 12.0h 12.0h 16.0h 20.0h
 
-##### --engage 1: taps 2/s, casts every skill, answers each '!' after .5 s, opens chests
+=== always (6 seeds, 200h) ===
+boss clear time per zone (median / min / max), tries, power jump at kill
+  Z0: 6/6 22m [19m..23m] tries 7.2 jump x2.41
+  Z1: 6/6 49m [46m..52m] tries 9.2 jump x2.44
+  Z2: 6/6 1.3h [1.2h..1.4h] tries 10.8 jump x2.67
+  Z3: 6/6 2.9h [2.7h..3.1h] tries 33.3 jump x2.99
+  Z4: 6/6 4.2h [3.9h..4.4h] tries 24.5 jump x3.37
+  Z5: 6/6 7.9h [7.2h..8.3h] tries 38.8 jump x3.86
+  Z6: 6/6 10.1h [9.9h..10.4h] tries 24.2 jump x4.48
+  Z7: 6/6 13.6h [13.0h..13.7h] tries 25.7 jump x0.00
+  kills per tier when the boss fell: Z0 137/127/106/91  Z1 179/168/157/153  Z2 215/206/197/170  Z3 704/693/693/501  Z4 546/536/529/460  Z5 1666/1656/1673/1126  Z6 1138/1128/1124/970  Z7 1874/1862/1864/1608
+  upgrades blocked (after 5 min): by gold only 0.0%, by materials 100.0%
+  quests claimed: 1 (first 10 at   -  )
+  evolutions: E1 7m x2.43 | E2 24m x2.50 | E3 55m x2.60 | E4 3.1h x2.38 | E5 8.2h x2.50
+  deaths 100  bossFails 165.7
+  first 5 min: 19 improvements, longest gap 66s [30,15,1,22,7,2,13,4,11,14,15,9,6,30,9,66,6,10,15]
+  final: Lv102 stage6 zone7 power 2.09e+19 M 707/1000000000
+  ln-share of atk: lv 17% evo 14% gear 41% M 26% nir 4%
+  nirvana: run 13.6h souls 36 | run 5.2h souls 35
+   run 1: 22m 51m 1.2h 2.7h 4.0h 8.2h 10.4h 13.6h
+   run 2: 0m 1m 5m 34m 1.1h 2.6h 3.8h 5.2h
+   run 3: 0m 1m 3m 18m 44m 1.8h 2.6h 3.6h
+
+##### --engage 1: taps 2/s, casts every skill, answers each '!' after .5 s, opens chests, claims every quest
 
 === active (6 seeds, 200h) ===
 boss clear time per zone (median / min / max), tries, power jump at kill
-  Z0: 6/6 12m [10m..15m] tries 3.3 jump x2.78
-  Z1: 6/6 30m [26m..39m] tries 8.0 jump x2.63
-  Z2: 6/6 2.0h [2.0h..2.1h] tries 8.2 jump x2.68
-  Z3: 6/6 4.2h [4.0h..4.3h] tries 24.5 jump x2.94
-  Z4: 6/6 6.1h [6.0h..6.2h] tries 18.0 jump x3.30
-  Z5: 6/6 10.2h [10.0h..10.3h] tries 29.7 jump x3.83
-  Z6: 6/6 12.6h [12.5h..14.0h] tries 18.5 jump x4.64
-  Z7: 6/6 24.0h [24.0h..24.2h] tries 19.3 jump x0.00
-  kills per tier when the boss fell: Z0 106/96/57/39  Z1 127/116/105/101  Z2 336/328/285/259  Z3 644/632/598/446  Z4 548/541/463/447  Z5 1204/1194/1192/890  Z6 896/886/881/770  Z7 1939/1930/1890/1621
+  Z0: 6/6 12m [9m..14m] tries 2.7 jump x6.06
+  Z1: 6/6 27m [24m..29m] tries 7.0 jump x2.88
+  Z2: 6/6 2.0h [41m..2.0h] tries 9.3 jump x2.78
+  Z3: 6/6 4.0h [4.0h..4.0h] tries 23.3 jump x3.09
+  Z4: 6/6 4.6h [4.5h..4.7h] tries 16.5 jump x3.45
+  Z5: 6/6 8.6h [8.3h..10.0h] tries 27.3 jump x3.97
+  Z6: 6/6 12.2h [12.0h..12.3h] tries 17.0 jump x4.48
+  Z7: 6/6 24.0h [14.6h..24.0h] tries 21.0 jump x0.00
+  kills per tier when the boss fell: Z0 94/86/53/31  Z1 120/109/99/95  Z2 327/318/282/263  Z3 571/560/553/442  Z4 320/310/301/252  Z5 1214/1202/1200/807  Z6 1081/1068/1053/743  Z7 2137/2128/2063/1922
   upgrades blocked (after 5 min): by gold only 0.0%, by materials 100.0%
-  evolutions: E1 7m x2.43 | E2 14m x2.50 | E3 34m x2.60 | E4 4.3h x2.39 | E5 10.4h x2.50
-  deaths 69  bossFails 121.5
-  first 5 min: 16 improvements, longest gap 34s [15,15,2,18,19,32,17,29,34,1,27,3,25,24,9,27]
-  final: Lv99 stage6 zone7 power 1.73e+19 M 708/1000000000
-  ln-share of atk: lv 16% evo 14% gear 41% M 26% nir 4%
-  nirvana: run 24.0h souls 36 | run 6.6h souls 35
-   run 1: 14m 30m 2.0h 4.0h 6.0h 10.2h 12.6h 24.0h
-   run 2: 0m 1m 3m 21m 44m 2.6h 4.5h 6.6h
-   run 3: 0m 1m 2m 1.4h 1.5h 2.1h 3.8h 5.6h
+  quests claimed: 59 (first 10 at 10m)
+  evolutions: E1 6m x2.43 | E2 13m x2.50 | E3 30m x2.60 | E4 4.1h x2.38 | E5 10.0h x2.50
+  deaths 60  bossFails 116.2
+  first 5 min: 23 improvements, longest gap 30s [15,14,1,3,2,5,5,11,4,20,16,15,10,14,12,30,1,20,24,17,21,4,25]
+  final: Lv99 stage6 zone7 power 1.68e+19 M 706/1000000000
+  ln-share of atk: lv 17% evo 14% gear 41% M 26% nir 4%
+  nirvana: run 14.7h souls 35 | run 13.4h souls 36
+   run 1: 9m 24m 2.0h 4.0h 4.7h 10.0h 12.2h 14.7h
+   run 2: 0m 1m 9.3h 9.3h 9.3h 11.3h 11.4h 13.4h
+   run 3: 0m 1m 2m 13m 29m 2.2h 3.9h 4.5h
 
 === normal (6 seeds, 200h) ===
 boss clear time per zone (median / min / max), tries, power jump at kill
-  Z0: 6/6 14m [11m..2.0h] tries 3.3 jump x4.61
-  Z1: 6/6 2.0h [2.0h..2.2h] tries 2.0 jump x2.57
-  Z2: 6/6 4.0h [2.2h..4.1h] tries 6.0 jump x3.21
-  Z3: 6/6 8.0h [6.2h..8.1h] tries 19.2 jump x2.91
-  Z4: 6/6 10.2h [10.0h..12.0h] tries 7.3 jump x3.75
-  Z5: 6/6 24.0h [24.0h..26.0h] tries 15.0 jump x3.86
-  Z6: 6/6 28.1h [26.2h..28.2h] tries 9.0 jump x4.65
-  Z7: 6/6 34.0h [32.0h..34.2h] tries 11.0 jump x0.00
-  kills per tier when the boss fell: Z0 106/98/72/48  Z1 253/244/226/217  Z2 315/307/287/257  Z3 825/769/718/397  Z4 495/488/431/353  Z5 2031/2022/2018/1635  Z6 731/720/715/624  Z7 1185/1176/1157/789
+  Z0: 6/6 9m [8m..13m] tries 1.8 jump x3.65
+  Z1: 6/6 2.0h [2.0h..2.0h] tries 2.5 jump x2.87
+  Z2: 6/6 2.2h [2.2h..4.0h] tries 6.5 jump x3.03
+  Z3: 6/6 6.2h [6.0h..6.2h] tries 15.3 jump x3.17
+  Z4: 6/6 10.0h [10.0h..10.2h] tries 9.3 jump x3.55
+  Z5: 6/6 24.0h [24.0h..24.0h] tries 16.2 jump x4.06
+  Z6: 6/6 26.2h [26.0h..28.0h] tries 10.0 jump x4.56
+  Z7: 6/6 32.0h [30.2h..32.2h] tries 11.0 jump x0.00
+  kills per tier when the boss fell: Z0 77/68/46/21  Z1 267/258/249/239  Z2 128/119/109/80  Z3 803/795/437/345  Z4 728/719/616/587  Z5 2066/2057/2052/1638  Z6 482/473/463/414  Z7 1156/1147/1139/790
   upgrades blocked (after 5 min): by gold only 0.0%, by materials 100.0%
-  evolutions: E1 7m x2.43 | E2 2.0h x2.50 | E3 2.1h x2.60 | E4 8.1h x2.39 | E5 24.2h x2.50
-  deaths 45  bossFails 64.8
-  first 5 min: 16 improvements, longest gap 33s [15,15,2,28,10,20,28,33,30,9,6,15,30,8,21,17]
-  final: Lv97 stage6 zone7 power 2.48e+19 M 741/1000000000
-  ln-share of atk: lv 16% evo 14% gear 40% M 27% nir 4%
-  nirvana: run 34.0h souls 35 | run 16.0h souls 36
-   run 1: 2.0h 2.2h 4.1h 8.1h 12.0h 26.0h 28.1h 34.0h
-   run 2: 0m 1m 3m 2.0h 2.2h 14.0h 14.1h 16.0h
-   run 3: 0m 1m 2m 11m 2.0h 4.1h 6.1h 8.2h
+  quests claimed: 59 (first 10 at 14m)
+  evolutions: E1 6m x2.43 | E2 10m x2.50 | E3 2.1h x2.61 | E4 8.0h x2.39 | E5 24.2h x2.50
+  deaths 39  bossFails 64.7
+  first 5 min: 14 improvements, longest gap 31s [2,29,30,4,11,30,6,24,25,5,31,14,15,3]
+  final: Lv97 stage6 zone7 power 2.10e+19 M 730/1000000000
+  ln-share of atk: lv 16% evo 14% gear 41% M 27% nir 4%
+  nirvana: run 30.2h souls 35 | run 17.9h souls 35
+   run 1: 13m 2.0h 4.0h 6.1h 10.0h 24.0h 26.1h 30.2h
+   run 2: 0m 1m 3m 1.8h 3.8h 5.9h 17.8h 17.9h
+   run 3: 0m 1m 2m 1.9h 1.9h 3.9h 5.9h 8.0h
 
 === idle (6 seeds, 200h) ===
 boss clear time per zone (median / min / max), tries, power jump at kill
-  Z0: 6/6 4.0h [4.0h..4.0h] tries 1.0 jump x3.55
-  Z1: 6/6 8.0h [8.0h..8.0h] tries 1.3 jump x2.41
-  Z2: 6/6 8.1h [8.1h..12.0h] tries 4.2 jump x3.96
-  Z3: 6/6 24.0h [24.0h..24.0h] tries 4.7 jump x3.00
-  Z4: 6/6 24.1h [24.1h..24.1h] tries 3.7 jump x6.08
-  Z5: 6/6 36.0h [32.0h..36.0h] tries 5.2 jump x4.20
-  Z6: 6/6 48.0h [48.0h..48.0h] tries 3.3 jump x4.58
-  Z7: 6/6 56.0h [52.0h..60.0h] tries 5.7 jump x0.00
-  kills per tier when the boss fell: Z0 1012/1003/489/17  Z1 515/506/496/487  Z2 45/36/27/17  Z3 2118/2109/2098/1470  Z4 50/41/32/23  Z5 1992/1979/1041/1033  Z6 1993/1984/1975/18  Z7 1235/1226/1218/542
+  Z0: 6/6 4.0h [4.0h..4.0h] tries 1.0 jump x3.88
+  Z1: 6/6 8.0h [8.0h..8.0h] tries 1.5 jump x2.59
+  Z2: 6/6 8.1h [8.1h..8.1h] tries 3.0 jump x4.30
+  Z3: 6/6 24.0h [24.0h..24.0h] tries 4.5 jump x2.90
+  Z4: 6/6 24.1h [24.1h..28.0h] tries 3.8 jump x7.74
+  Z5: 6/6 36.0h [32.0h..36.0h] tries 5.8 jump x4.32
+  Z6: 6/6 48.0h [48.0h..48.0h] tries 3.2 jump x4.49
+  Z7: 6/6 56.0h [52.0h..72.0h] tries 4.8 jump x0.00
+  kills per tier when the boss fell: Z0 695/686/649/17  Z1 515/506/497/487  Z2 43/34/25/16  Z3 2123/2114/2103/1471  Z4 55/46/36/27  Z5 2014/1690/1063/1048  Z6 1993/1983/1975/18  Z7 1206/1196/1186/531
   upgrades blocked (after 5 min): by gold only 0.0%, by materials 100.0%
-  evolutions: E1 4.0h x2.43 | E2 4.1h x2.50 | E3 8.1h x2.61 | E4 24.1h x2.38 | E5 48.0h x2.50
-  deaths 8  bossFails 21.0
-  first 5 min: 26 improvements, longest gap 44s [15,2,13,1,10,6,14,1,11,4,15,11,19,1,14,3,12,15,9,6,8,44,8,15,15,28]
-  final: Lv95 stage6 zone7 power 5.03e+18 M 717/1000000000
-  ln-share of atk: lv 16% evo 14% gear 39% M 27% nir 5%
-  nirvana: run 56.0h souls 36 | run 24.0h souls 36
-   run 1: 4.0h 8.0h 12.0h 24.0h 24.1h 32.0h 48.0h 56.0h
-   run 2: 0m 1m 3m 4.0h 4.1h 16.0h 20.0h 24.0h
-   run 3: 0m 1m 3m 4.0h 4.0h 16.0h 16.0h 20.0h
+  quests claimed: 33 (first 10 at 4.1h)
+  evolutions: E1 4.0h x2.43 | E2 4.0h x2.50 | E3 8.0h x2.61 | E4 24.1h x2.38 | E5 48.0h x2.50
+  deaths 9  bossFails 19.7
+  first 5 min: 11 improvements, longest gap 58s [15,15,30,3,42,2,58,1,30,45,46]
+  final: Lv95 stage6 zone7 power 7.76e+18 M 740/1000000000
+  ln-share of atk: lv 16% evo 14% gear 39% M 28% nir 4%
+  nirvana: run 52.0h souls 35 | run 24.0h souls 35
+   run 1: 4.0h 8.0h 8.1h 24.0h 28.0h 32.0h 48.0h 52.0h
+   run 2: 0m 1m 3m 4.0h 4.1h 20.0h 20.0h 24.0h
+   run 3: 0m 1m 2m 4.0h 4.0h 8.0h 20.0h 20.0h
+
+=== always (6 seeds, 200h) ===
+boss clear time per zone (median / min / max), tries, power jump at kill
+  Z0: 6/6 15m [11m..16m] tries 4.3 jump x4.32
+  Z1: 6/6 30m [25m..33m] tries 5.8 jump x2.93
+  Z2: 6/6 52m [46m..55m] tries 9.3 jump x2.73
+  Z3: 6/6 1.9h [1.8h..2.0h] tries 28.3 jump x3.15
+  Z4: 6/6 2.6h [2.5h..2.7h] tries 22.5 jump x3.37
+  Z5: 6/6 4.9h [4.6h..4.9h] tries 34.3 jump x4.03
+  Z6: 6/6 6.0h [5.7h..6.3h] tries 25.3 jump x4.42
+  Z7: 6/6 7.6h [7.3h..7.8h] tries 25.5 jump x0.00
+  kills per tier when the boss fell: Z0 99/91/69/53  Z1 118/107/97/92  Z2 196/183/173/149  Z3 551/528/475/338  Z4 423/415/343/321  Z5 1263/1253/1257/932  Z6 730/720/685/579  Z7 1311/1294/1164/1060
+  upgrades blocked (after 5 min): by gold only 0.0%, by materials 100.0%
+  quests claimed: 59 (first 10 at 18m)
+  evolutions: E1 7m x2.43 | E2 16m x2.50 | E3 33m x2.60 | E4 2.0h x2.38 | E5 5.1h x2.50
+  deaths 96  bossFails 147.5
+  first 5 min: 17 improvements, longest gap 61s [15,11,4,15,15,2,29,11,4,15,15,8,22,30,14,61,8]
+  final: Lv102 stage6 zone7 power 1.40e+19 M 680/1000000000
+  ln-share of atk: lv 17% evo 14% gear 41% M 25% nir 4%
+  nirvana: run 7.6h souls 35 | run 3.2h souls 35
+   run 1: 16m 33m 53m 2.0h 2.7h 4.9h 6.1h 7.6h
+   run 2: 0m 1m 3m 20m 44m 1.7h 2.6h 3.2h
+   run 3: 1m 1m 3m 13m 29m 1.1h 1.8h 2.4h

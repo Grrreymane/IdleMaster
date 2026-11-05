@@ -31,7 +31,7 @@ function onEvent(type, d) {
     case 'kill': {
       const e = enemySprite(d.z, d.t); FX.eDie = EDIE; FX.eDieSpr = e; FX.eDieX = W - 4 - e.w; FX.slash = 0; SFX.kill();
       for (let i = 0; i < 8; i++) part(W - 4 - e.w / 2 + rand(-e.w / 3, e.w / 3), FLOOR - 2, rand(-14, 14), rand(-18, -4), i & 1 ? '#c8b8a0' : MAT_COL[d.z], .7);   // dust + a glint of the zone material
-      pop('+' + fmt(d.gold), 150, 46, '#9af0c0', 6, .8); dirty = true;
+      pop(`${d.gilded ? '金身！' : ''}${ZONES[d.z].mat} +${fmt(d.mat)}`, 146, 46, d.gilded ? '#ffd27a' : MAT_COL[d.z], d.gilded ? 9 : 7, d.gilded ? 1.6 : .9); dirty = true;
       if (d.t < 4 && !GIFT && T >= giftNext && !document.hidden && Math.random() < BAL.giftRate) { GIFT = { x: rand(70, 112), y: rand(38, 62), t: BAL.giftLife }; giftNext = T + BAL.giftGap; SFX.chest(); }
       break;
     }
@@ -41,7 +41,9 @@ function onEvent(type, d) {
       for (let i = 0; i < 10; i++) part(60 + rand(-20, 20), 100 + rand(-20, 10), rand(-15, 15), rand(-40, -10), RAR[d.r].c, 1.2); break;
     case 'dup': toast(`<span class="r${d.r}">${itemName(d.id)}</span> 重复，换成灵玉 +${fmt(d.gold)}`); break;
     case 'death': toast('<span class="bad">被打倒了</span>，退回一档'); break;
-    case 'spawn': FX.eIn = EIN; if (d.t === 4) { SFX.boss(); toast(`<span class="gold">${ZONES[d.z].boss}</span>：${ZONES[d.z].intro}`); toast(`${ZONES[d.z].rule}；<span class="good">${ZONES[d.z].ans}</span>`); } break;
+    case 'spawn': FX.eIn = EIN;
+      if (d.t < 4 && T >= gildNext && !document.hidden && Math.random() < BAL.gildRate && gildFoe(S)) { gildNext = T + BAL.gildGap; SFX.chest(); pop('金身妖兽！', 128, 34, '#ffd27a', 10, 1.4); }
+      if (d.t === 4) { SFX.boss(); toast(`<span class="gold">${ZONES[d.z].boss}</span>：${ZONES[d.z].intro}`); toast(`${ZONES[d.z].rule}；<span class="good">${ZONES[d.z].ans}</span>`); } break;
     case 'bossFail': SFX.bossFail(); toast(d.why === 'time' ? '<span class="bad">时间到</span>，大妖退回了' : '<span class="bad">败给了大妖</span>，强化后再来'); bossOdds.k = null; break;
     case 'bossWin': onBossWin(d); break;
     case 'revive': pop('复活!', 150, 60, '#ff6a4a', 9); break;
@@ -50,6 +52,7 @@ function onEvent(type, d) {
     case 'daze': pop('惑心', 120, 50, '#ff8ad0', 8); break;
     case 'phase': pop(d ? '月相' : '日相', 150, 40, d ? '#c8d8ff' : '#ffb040', 9); break;
     case 'tap': tapShow(d); break;
+    case 'quest': SFX.open(); dirty = true; toast(`<span class="gold">${d.q.n}</span> ${ZONES[d.q.z].mat} +${fmt(d.mat)}`); toast(`<span class="dim">${d.q.say}</span>`); for (let i = 0; i < 14; i++) part(54 + rand(-26, 26), 86 + rand(-18, 18), rand(-20, 20), rand(-46, -12), i & 1 ? '#ffe890' : MAT_COL[d.q.z], .9); break;
     case 'skill': SFX.skill(d); pop(BAL.skills[d].n, 92, 34, '#ffb060', 11, 1); if (BAL.skills[d].roar) FX.shock = .45; break;
     case 'tele': SFX.tele(); break;
     case 'parry': SFX.parry(); FX.eHit = .12; pop(PARRY[d], 128, 30, '#fff4c0', 11, 1); for (let i = 0; i < 12; i++) part(136 + rand(-14, 14), 58 + rand(-14, 14), rand(-40, 40), rand(-40, 20), '#fff4c0', .5); dirty = true; break;
@@ -58,9 +61,9 @@ function onEvent(type, d) {
 }
 // a tap on the stage shows as one small number at a time, however fast the taps come
 const TAPV = { g: 0, m: 0, x: 0, y: 0, last: 0, n: 0, at: 0 };
-let giftNext = 45;
+let giftNext = 45, gildNext = 120;
 function tapShow(d) {
-  SFX.tap(); FX.hop = .07; TAPV.g += d.gold; TAPV.m += d.mat; TAPV.n++; dirty = dirty || !!d.mat;
+  SFX.tap(); if (FX.hop < .03) FX.hop = .13; TAPV.g += d.gold; TAPV.m += d.mat; TAPV.n++; dirty = dirty || !!d.mat;
   if (TAPV.n % 18 === 0) pop(pick(['吼！', '嗷呜', '呜—']), 62, 40, '#ffffff', 8);
 }
 function tapFlush() {
@@ -123,6 +126,7 @@ document.addEventListener('click', e => {
     case 'auto': S.auto = !S.auto; SFX.click(); break;
     case 'zone': if (+v !== S.zone) { setFight(S, +v, 0); SFX.click(); } break;
     case 'tier': { const t = +v; if (t === 4) { bossPre = DER; } else if (S.auto) { S.auto = false; toast('只打这一档，自动巡山关了'); } if (setFight(S, S.zone, t)) SFX.click(); break; }
+    case 'qclaim': claimQuest(S, onEvent, DER); recalc(); saveGame(); break;
     case 'sk': if (castSkill(S, +v, onEvent, DER) && dirty) recalc(); break;
     case 'boss': bossPre = DER; if (setFight(S, +v, 4)) SFX.click(); break;
     case 'nir': modal(`<h2>涅槃？</h2><div style="text-align:center">回到南山从头修，带走 <b class="gold">${Math.min(nirvanaSouls(S), BAL.nirMax - S.souls)}</b> 点精魄。<div style="margin-top:8px"><button class="btn r" data-act="nirgo">涅槃</button> <button class="btn off" data-act="close">再等等</button></div></div>`); break;

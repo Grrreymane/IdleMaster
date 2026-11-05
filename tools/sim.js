@@ -16,7 +16,7 @@ function loadRules(seed) {
   const code = html.slice(a, b);
   const ctx = { Math, console };
   vm.createContext(ctx);
-  vm.runInContext(code + '\n;this.R = { BAL, SLOTS, newState, derive, step, setRnd, upgradeSlot, matZone, slotCost, slotCap, evoNeed, canEvolve, evolve, setFight, canFight, offlineGain, nirvana, canNirvana, nirvanaSouls, enemyStats, mastery, tap, castSkill, answerTele, openGift, skillOpen, FORMS: typeof FORMS !== "undefined" ? FORMS : null };', ctx);
+  vm.runInContext(code + '\n;this.R = { BAL, SLOTS, newState, derive, step, setRnd, upgradeSlot, matZone, slotCost, slotCap, evoNeed, canEvolve, evolve, setFight, canFight, offlineGain, nirvana, canNirvana, nirvanaSouls, enemyStats, mastery, tap, castSkill, answerTele, openGift, skillOpen, questDone, questNow, claimQuest, gildFoe, FORMS: typeof FORMS !== "undefined" ? FORMS : null };', ctx);
   let s = seed >>> 0;
   ctx.R.setRnd(() => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; });
   return ctx.R;
@@ -27,6 +27,7 @@ const SCHED = {
   active: t => { const d = t % 86400; return d < 16 * 3600 && (d % 7200) < 2700; },      // 45 of every 120 min while awake: 6 h/day
   normal: t => { const d = t % 86400; return d < 16 * 3600 && (d % 7200) < 900; },       // 15 min every 2 h: 2 h/day
   idle: t => { const d = t % 86400; return d < 16 * 3600 && (d % 14400) < 300; },        // 5 min every 4 h: 20 min/day
+  always: () => true,                                                                     // never leaves: shows pace without the sleep and login gaps
 };
 
 function run(who, seed, nirRuns) {
@@ -34,10 +35,11 @@ function run(who, seed, nirRuns) {
   let S = R.newState();
   const DT = .1, T = HOURS * 3600, online = SCHED[who];
   let D = R.derive(S), dirty = false, t = 0, offSince = null;
-  const log = { runs: [{}], zone: {}, evo: [], boss: {}, deaths: 0, bossFails: 0, ups: [], nir: [], power: [], firstMin: [], gate: { gold: 0, mat: 0 } };
-  let lastPow = 0, lastAct = -1e9, bossWait = 0, lastBossPow = 0;
+  const log = { runs: [{}], zone: {}, evo: [], boss: {}, deaths: 0, bossFails: 0, ups: [], nir: [], power: [], firstMin: [], gate: { gold: 0, mat: 0 }, quests: [] };
+  let lastPow = 0, lastAct = -1e9, bossWait = 0, lastBossPow = 0, nextGild = 300;
   const E = (type, d) => {
     if (type === 'kill' || type === 'level' || type === 'item') dirty = true;
+    if (type === 'spawn' && t >= nextGild && Math.random() < R.BAL.gildRate && R.gildFoe(S)) nextGild = t + R.BAL.gildGap;
     if (type === 'level' || type === 'item') log.firstMin.push(t);
     if (type === 'death') log.deaths++;
     if (type === 'bossFail') { log.bossFails++; log.boss[d.z] = log.boss[d.z] || { tries: 0 }; log.boss[d.z].tries++; }
@@ -51,6 +53,7 @@ function run(who, seed, nirRuns) {
   };
   const lines = ['fox', 'fierce', 'dragon', 'auspicious'];
   const act = () => {
+    while (R.questDone(S) && R.claimQuest(S, E, D)) { log.quests.push(t); dirty = true; }
     // evolve first
     if (R.canEvolve(S)) { const p0 = R.derive(S).power; const nx = R.FORMS[S.form].next; R.evolve(S, nx[Math.floor(Math.random() * nx.length)]); const p1 = R.derive(S).power; log.evo.push({ t, stage: S.stage, jump: p1 / p0 }); log.firstMin.push(t); dirty = true; }
     // reserve materials for the next evolution once its level + boss conditions are met
@@ -123,6 +126,7 @@ for (const who of WHO) {
   console.log('  kills per tier when the boss fell: ' + [0, 1, 2, 3, 4, 5, 6, 7].map(z => `Z${z} ` + [0, 1, 2, 3].map(k => med(runs.map(r => r.boss[z] && r.boss[z].kills ? r.boss[z].kills[k] : 0))).join('/')).join('  '));
   const gt = runs.reduce((g, r) => ({ gold: g.gold + r.gate.gold, mat: g.mat + r.gate.mat }), { gold: 0, mat: 0 });
   console.log(`  upgrades blocked (after 5 min): by gold only ${(gt.gold / (gt.gold + gt.mat) * 100).toFixed(1)}%, by materials ${(gt.mat / (gt.gold + gt.mat) * 100).toFixed(1)}%`);
+  console.log(`  quests claimed: ${(runs.reduce((a, r) => a + r.quests.length, 0) / SEEDS).toFixed(0)} (first 10 at ${fmt(runs[0].quests[9])})`);
   const ev = [];
   for (let s = 1; s <= 5; s++) { const ts = runs.map(r => (r.evo.find(e => e.stage === s) || {}).t).filter(x => x != null).sort((a, b) => a - b); const j = runs.map(r => (r.evo.find(e => e.stage === s) || {}).jump).filter(Boolean); ev.push(`E${s} ${fmt(ts[ts.length >> 1])} x${j.length ? (j.reduce((a, b) => a + b) / j.length).toFixed(2) : '-'}`); }
   console.log('  evolutions: ' + ev.join(' | '));

@@ -45,7 +45,7 @@ try {
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
   await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
   // the test hook evals the hash inside the game's closure: expose what the scenario needs
-  const hook = "window.__t={get S(){return S},set S(v){S=v},get TAB(){return TAB},recalc,fresh,spawn,renderUI,setTab,get GIFT(){return GIFT},set GIFT(v){GIFT=v},W,H,BAL,get DER(){return DER},TUT,closeModal};";
+  const hook = "window.__t={get S(){return S},set S(v){S=v},get TAB(){return TAB},recalc,fresh,spawn,renderUI,setTab,get GIFT(){return GIFT},set GIFT(v){GIFT=v},W,H,BAL,get DER(){return DER},TUT,closeModal,gildFoe,questDone,questNow};";
   await send('Page.navigate', { url: `http://127.0.0.1:${port}/_test.html#${encodeURIComponent(hook)}` });
   for (let i = 0; i < 60; i++) { await sleep(200); if (await ev('!!window.__t')) break; }
   await sleep(600);

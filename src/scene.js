@@ -66,14 +66,21 @@ function fallbackMonster(z, t) {
   const f = { body: shade(col, 10), belly: shade(col, 50), ears: ['fox', 'cat', 'round', 'long'][(z + t) & 3], snout: ['short', 'mid', 'long'][(z * 3 + t) % 3], tail: ['thin', 'lion', 'fox', 'stub'][(t + z) & 3], size: t === 4 ? .95 : .55, thick: t === 4 ? 1 : 0, fangs: t >= 2 ? 1 : 0, horn: t === 4 ? 'twin' : null, eye: '#ff4a3a' };
   return quadGrid(f, {}).G;
 }
+function goldC(cv) {   // the same sprite cast in gold: light and dark stay, the colour goes
+  const c = mk(cv.width, cv.height), x = c.getContext('2d');
+  x.drawImage(cv, 0, 0); x.globalCompositeOperation = 'color'; x.fillStyle = '#ffb820'; x.fillRect(0, 0, c.width, c.height);
+  x.globalCompositeOperation = 'lighter'; x.fillStyle = '#2a1c00'; x.fillRect(0, 0, c.width, c.height);
+  x.globalCompositeOperation = 'destination-in'; x.drawImage(cv, 0, 0);
+  return c;
+}
 function enemySprite(z, t) {
   const k = z + '-' + t; if (ESPR[k]) return ESPR[k];
   const im = PIX['m' + k];
-  if (im) { const r = mk(im.width, im.height); r.getContext('2d').drawImage(im, 0, 0); const l = flipC(r); return (ESPR[k] = { l, w: l.width, h: l.height, white: tintC(l, '#ffffff'), red: tintC(l, '#ff4a3a', .45), sil: tintC(l, '#2a2038') }); }
+  if (im) { const r = mk(im.width, im.height); r.getContext('2d').drawImage(im, 0, 0); const l = flipC(r); return (ESPR[k] = { l, w: l.width, h: l.height, white: tintC(l, '#ffffff'), red: tintC(l, '#ff4a3a', .45), sil: tintC(l, '#2a2038'), gold: goldC(l) }); }
   let G = typeof monsterGrid === 'function' ? monsterGrid(z, t) : fallbackMonster(z, t);
   G = cropGrid(G); G.selOutline();
   const r = G.canvas(), l = flipC(r);
-  return (ESPR[k] = { l, w: l.width, h: l.height, white: tintC(l, '#ffffff'), red: tintC(l, '#ff4a3a', .45), sil: tintC(l, '#2a2038') });
+  return (ESPR[k] = { l, w: l.width, h: l.height, white: tintC(l, '#ffffff'), red: tintC(l, '#ff4a3a', .45), sil: tintC(l, '#2a2038'), gold: goldC(l) });
 }
 // ------------------------------------------------------------ live state of the stage
 const FX = { lunge: 0, hurt: 0, eHit: 0, eDie: 0, eDieSpr: null, eDieX: 0, evo: 0, evoFrom: null, warn: 0, flood: 0, rel: 0, slash: 0, slashCr: false, eIn: 0, hop: 0, shock: 0 };
@@ -112,7 +119,7 @@ function drawStage(T) {
   const D = DER, spr = formSprite(S.form, gearOf(S));
   const breath = Math.sin(T * 2.4) > .2 ? 1 : 0, lp = FX.lunge > 0 ? 1 - FX.lunge / LUNGE : 1;
   const lunge = FX.lunge > 0 ? R(lp < .3 ? -lp / .3 * 2 : Math.sin((lp - .3) / .7 * Math.PI) * 6) : 0, knock = FX.hurt > .1 ? -1 : 0;
-  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge + knock, by = FLOOR - spr.gy - (FX.hop > 0 ? 1 : 0);   // wide sprites slide left so the enemy stays clear
+  const bx = (boss ? -14 - Math.max(0, spr.w - 100) : -6 - Math.max(0, spr.w - 112)) + lunge + knock, by = FLOOR - spr.gy;   // wide sprites slide left so the enemy stays clear
   // shadow
   g.globalAlpha = .28; g.fillStyle = '#000'; g.fillRect(bx + 22, FLOOR - 1, 70, 3); g.globalAlpha = 1;
   // rarity aura: motes rising for each ornate (r >= 3) item worn
@@ -123,8 +130,13 @@ function drawStage(T) {
   if (dead) g.globalAlpha = .35;
   // breathing: everything above the paws rises a pixel; the only stretched row is just above the ground, so it reads as legs straightening
   const cut = spr.gy - 3;
-  g.drawImage(img, bx, by);
-  g.drawImage(img, 0, 0, spr.w, cut, bx, by - breath, spr.w, cut);
+  if (FX.hop > 0) {   // a tap: squash onto the ground, then a small stretch back (feet stay put)
+    const sq = FX.hop > .07 ? .07 : -.04;
+    g.drawImage(img, R(bx - spr.w * sq / 2), R(by + spr.gy * sq), R(spr.w * (1 + sq)), R(spr.h * (1 - sq)));
+  } else {
+    g.drawImage(img, bx, by);
+    g.drawImage(img, 0, 0, spr.w, cut, bx, by - breath, spr.w, cut);
+  }
   if (FX.hurt > 0) { g.globalAlpha = .35 * FX.hurt / .2; g.drawImage(spr.red, bx, by - breath); }
   g.globalAlpha = 1;
   if (FX.shock > 0) {   // 怒吼: a ring of sound leaves the head
@@ -145,6 +157,7 @@ function drawStage(T) {
     const e = enemySprite(S.f.z, S.f.t), ein = FX.eIn > 0 ? FX.eIn / EIN : 0, ex = W - 4 - e.w + (FX.eHit > 0 ? R(FX.eHit / .12 * 3) : 0) + R(ein * ein * (e.w + 10)), ey = FLOOR + 1 - e.h;   // a new foe walks in from the right
     g.globalAlpha = .28; g.fillStyle = '#000'; g.fillRect(ex + 4, FLOOR - 1, e.w - 8, 3); g.globalAlpha = 1;
     g.drawImage(e.l, ex, ey);
+    if (S.f.gilded) { g.drawImage(e.gold, ex, ey); if (Math.random() < .5) part(ex + Math.random() * e.w, ey + Math.random() * e.h, rand(-4, 4), -14, Math.random() < .5 ? '#fff0a0' : '#ffc830', .6); }
     if (FX.eHit > 0) { g.globalAlpha = .5 * FX.eHit / .12; g.drawImage(e.red, ex, ey); g.globalAlpha = 1; }
     if (FX.slash > 0) slashFX(ex + e.w / 2, ey + e.h * .45, Math.min(e.w, e.h) * .45, 1 - FX.slash / SLASH, FX.slashCr);
     if (S.f.poison > 0) { g.globalAlpha = .4; g.drawImage(e.red, ex, ey); g.globalAlpha = 1; }
@@ -152,7 +165,7 @@ function drawStage(T) {
     hpBar(hx, hy, ew, 3, S.f.hp / S.f.max, boss ? '#ff5a3a' : '#e04848');
     if (S.f.shield > 0) hpBar(hx, hy + 4, ew, 1, S.f.shield / S.f.max * 8, '#8ad0ff');
     const name = boss ? ZONES[S.f.z].boss : ZONES[S.f.z].mons[S.f.t];
-    txt(name + (boss ? '' : ' ' + TIER_N[S.f.t]), hx + ew / 2, hy - 5, 6, boss ? '#ffd27a' : '#ffffff');
+    txt((S.f.gilded ? '金身 ' : '') + name + (boss ? '' : ' ' + TIER_N[S.f.t]), hx + ew / 2, hy - 5, 6, boss || S.f.gilded ? '#ffd27a' : '#ffffff');
     if (boss) {
       const left = Math.max(0, BAL.bossTime - S.f.time);
       txt(Math.ceil(left) + '秒', W - 8, 30, 6, left < 10 ? '#ff8a6a' : '#ffffff', 'right');
