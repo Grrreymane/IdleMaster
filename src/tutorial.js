@@ -13,13 +13,16 @@ const TUT_STEPS = [
   { text: '大妖出现了！点这里挑战', sel: '[data-k="bossS"]', show: () => !!(S.unlocked[0] && S.unlocked[0][4]), done: () => S.stats.bossTries > 0 || !!S.bossWins[0] },
   { text: '打不过就强化再来；卡住点「变强」', sel: '[data-act="guide"]', show: () => S.stats.bossTries > 0, done: () => TUT.clicked === 'guide' || TUT.t > 8 },
 ];
+// a mouse means a keyboard: those players also hear about the space bar
+const HAS_KEYS = !!(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches);
+if (HAS_KEYS) TIPS.push('按空格也算点屏幕，还能应对「!」');
 // hints that don't wait their turn: each shows once it applies, until the player has done it. first: goes ahead of the steps above (it won't wait)
 const TUT_FREE = [
-  { id: 'tele', first: 1, text: '出现「!」就点它', pt: () => TELE_AT, show: () => !!(S.f && S.f.tele && TELE_AT), done: () => S.stats.parries > 0 },
+  { id: 'tele', first: 1, text: HAS_KEYS ? '出现「!」就点它或按空格' : '出现「!」就点它', pt: () => TELE_AT, show: () => !!(S.f && S.f.tele && TELE_AT), done: () => S.stats.parries > 0 },
   { id: 'gift', first: 1, text: '宝匣！点开它', pt: () => GIFT && [GIFT.x, GIFT.y], show: () => !!GIFT, done: () => S.stats.gifts > 0 },
   { id: 'sk0', text: '新技能！点它', sel: '[data-k="sk0"]', show: () => skillOpen(S, 0) && S.cd[0] <= 0, done: () => S.stats.casts > 0 },
   { id: 'quest', text: '任务完成！点这里领奖', sel: '[data-k="qclaim"]', show: () => questDone(S), done: () => S.q > 0 },
-  { id: 'tap', text: '点点它：攒灵玉，还会掉材料', pt: () => [48, 84], show: () => TUT.i >= 1 && S.stats.kills > 2, done: () => S.stats.taps >= 6 },
+  { id: 'tap', text: HAS_KEYS ? '点点它或按空格：攒灵玉，还会掉材料' : '点点它：攒灵玉，还会掉材料', pt: () => [48, 84], show: () => TUT.i >= 1 && S.stats.kills > 2, done: () => S.stats.taps >= 6 },
 ];
 function tutClick(act) { TUT.clicked = act; }
 function updateTut(dt) {

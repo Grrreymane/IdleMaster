@@ -1,5 +1,5 @@
 // What a phone player does with one thumb. Run through tests/touch.mjs.
-export default async ({ ev, touch, touchEl, rectOf, check, sleep }) => {
+export default async ({ ev, touch, touchEl, rectOf, check, sleep, send }) => {
   // stage coordinates (the game's own 180 x 128) -> screen
   const stage = async (x, y) => { const r = await ev(`(()=>{const c=document.getElementById('c').getBoundingClientRect();return {l:c.left,t:c.top,w:c.width,h:c.height}})()`); return [r.l + x / 180 * r.w, r.t + y / 128 * r.h]; };
   const tapStage = async (x, y) => { const [a, b] = await stage(x, y); await touch(a, b); };
@@ -53,6 +53,47 @@ export default async ({ ev, touch, touchEl, rectOf, check, sleep }) => {
   check('a tap on the beast leaves it unanswered', await ev('__t.S.stats.parries') === p0);
   await tapStage(140, 60); await sleep(80);
   check('a tap on the enemy answers it', await ev('__t.S.stats.parries') === p0 + 1 && await ev('__t.S.f.dodge') === 1);
+  // ---- the space bar, as real key events: a press taps, a held key keeps tapping, only a fresh press answers the "!"
+  const key = async (autoRepeat = false) => {
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', code: 'Space', key: ' ', windowsVirtualKeyCode: 32, autoRepeat });
+    if (!autoRepeat) await send('Input.dispatchKeyEvent', { type: 'keyUp', code: 'Space', key: ' ', windowsVirtualKeyCode: 32 });
+  };
+  const taps = () => ev('__t.S.stats.taps');
+  const raise = async () => {
+    await ev('__t.S.zone = 0; __t.spawn(__t.S, 0, 4); __t.S.f.hp = __t.S.f.max = 1e12; __t.S.f.hits = 3; __t.S.f.eT = 0; __t.S.hp = __t.DER.hp');
+    for (let i = 0; i < 80 && !await ev('!!(__t.S.f && __t.S.f.tele)'); i++) await sleep(40);
+    await sleep(50);   // the "!" has been drawn
+  };
+  await ev('__t.S.f = null'); await sleep(150);
+  let tk = await taps(); const gk = await ev('__t.S.gold');
+  await key(); await sleep(60);
+  check('space taps', await taps() === tk + 1 && await ev('__t.S.gold') > gk);
+  await sleep(120); tk = await taps();
+  for (let i = 0; i < 5; i++) { await key(true); await sleep(110); }
+  check('holding space keeps tapping', await taps() === tk + 5, `+${await taps() - tk}`);
+  tk = await taps();
+  for (let i = 0; i < 10; i++) await key(true);
+  await sleep(20);
+  check('a held key is limited like the finger', await taps() - tk <= 2, `+${await taps() - tk} of 10 in one burst`);
+  await sleep(120);
+  await ev('document.querySelector(\'[data-act="tab"][data-v="gear"]\').focus()');
+  const tabK = await ev('__t.TAB');
+  await key(); await sleep(80);
+  check('space does not click the focused button', await ev('__t.TAB') === tabK);
+  await ev('document.activeElement.blur()');
+  await touchEl('[data-act="guide"]'); await sleep(120);
+  tk = await taps();
+  await key(); await sleep(60);
+  check('no taps while a window is open', await taps() === tk && await ev('document.getElementById("modal").classList.contains("on")'));
+  await touchEl('#mbox [data-act="close"]'); await sleep(120);
+  await raise();
+  const pk = await ev('__t.S.stats.parries');
+  tk = await taps();
+  await key(true); await sleep(60);
+  check('a held key does not answer the "!"', await ev('__t.S.stats.parries') === pk && await ev('!!__t.S.f.tele') && await taps() === tk + 1);
+  await sleep(100);
+  await key(); await sleep(60);
+  check('a fresh press answers the "!"', await ev('__t.S.stats.parries') === pk + 1 && await ev('__t.S.f.dodge') === 1);
   // ---- patrol: with 自动 on the fights go through the open tiers
   await ev('__t.S.f = null; __t.S.zone = 0; __t.S.tier = 0; __t.S.auto = true; __t.S.unlocked[0] = [1,1,1,1,0]; __t.S.calm = 0; __t.S.lv = 60; __t.S.bossWins = {0:1}; __t.recalc()');
   const seen = new Set(); for (let i = 0; i < 120 && seen.size < 4; i++) { const t = await ev('__t.S.f ? __t.S.f.t : -1'); if (t >= 0) seen.add(t); await sleep(120); }

@@ -160,14 +160,26 @@ window.addEventListener('contextmenu', e => e.preventDefault());
 ['pointerup', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, () => initAudio()));
 // the stage: the chest and the boss's "!" first, otherwise a tap
 let lastTap = 0;
+function tapAt(x, y) {
+  const now = performance.now(); if (now - lastTap < 100) return; lastTap = now;
+  TAPV.x = x; TAPV.y = y; tap(S, onEvent); for (let i = 0; i < 2; i++) part(x + rand(-3, 3), y + rand(-3, 3), rand(-12, 12), rand(-24, -6), '#ffe890', .35);
+}
 cv.addEventListener('pointerdown', e => {
   initAudio();
   const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
   if (GIFT && Math.hypot(x - GIFT.x, y - GIFT.y) < 24) { openChest(); return; }
   if (TELE_AT && (x > 92 || Math.hypot(x - TELE_AT[0], y - TELE_AT[1]) < 30) && answerTele(S, onEvent, DER)) { if (dirty) recalc(); return; }
-  const now = performance.now(); if (now - lastTap < 90) return; lastTap = now;
-  TAPV.x = x; TAPV.y = y; tap(S, onEvent); for (let i = 0; i < 2; i++) part(x + rand(-3, 3), y + rand(-3, 3), rand(-12, 12), rand(-24, -6), '#ffe890', .35);
+  tapAt(x, y);
 });
+// the space bar: a tap on the beast. Only a fresh press answers the "!", or holding the key would parry everything
+window.addEventListener('keydown', e => {
+  if (e.code !== 'Space') return;
+  e.preventDefault();   // no scrolling, and no click on the button the mouse left focused
+  if (elModal.classList.contains('on')) return;
+  if (!e.repeat && TELE_AT && answerTele(S, onEvent, DER)) { if (dirty) recalc(); return; }
+  tapAt(48 + rand(-7, 7), 84 + rand(-7, 7));
+});
+window.addEventListener('keyup', e => { if (e.code === 'Space') e.preventDefault(); });   // Firefox clicks a focused button on keyup
 // ------------------------------------------------------------ simulation driving
 function advance(dt) {   // dt seconds of game time, in small steps
   while (dt > 0) { const d = Math.min(.05, dt); dt -= d; step(S, d, onEvent, DER); if (dirty) recalc(); }
